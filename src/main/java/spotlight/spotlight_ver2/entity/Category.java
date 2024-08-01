@@ -1,4 +1,4 @@
-package spotlight.spotlight_ver2.Entity;
+package spotlight.spotlight_ver2.entity;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
