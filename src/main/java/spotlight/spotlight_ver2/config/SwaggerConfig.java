@@ -12,7 +12,7 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Spring Boot REST API")
+                        .title("Spotlight API")
                         .version("1.0")
                         .description("Spring Boot REST API documentation using springdoc-openapi and OpenAPI 3."));
     }
