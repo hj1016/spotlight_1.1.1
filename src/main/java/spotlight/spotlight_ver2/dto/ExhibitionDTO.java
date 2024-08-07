@@ -1,4 +1,4 @@
-package spotlight.spotlight_ver2.DTO;
+package spotlight.spotlight_ver2.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

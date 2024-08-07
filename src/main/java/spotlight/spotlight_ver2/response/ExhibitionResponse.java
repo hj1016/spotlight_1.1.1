@@ -1,6 +1,6 @@
 package spotlight.spotlight_ver2.response;
 
-import spotlight.spotlight_ver2.DTO.ExhibitionDTO;
+import spotlight.spotlight_ver2.dto.ExhibitionDTO;
 
 public class ExhibitionResponse {
     private boolean success;
