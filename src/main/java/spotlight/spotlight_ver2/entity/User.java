@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import spotlight.spotlight_ver2.enums.Role;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,6 +28,9 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @Column(name = "access_token")
     private String accessToken;
 
@@ -48,8 +52,6 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private Recruiter recruiter;
-
-    // Role enum
 
     // OneToMany hashtags
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -104,6 +106,14 @@ public class User {
         this.password = password;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public String getAccessToken() {
         return accessToken;
     }
@@ -150,6 +160,14 @@ public class User {
 
     public void setRecruiter(Recruiter recruiter) {
         this.recruiter = recruiter;
+    }
+
+    public List<Hashtag> getHashtags() {
+        return hashtags;
+    }
+
+    public void setHashtags(List<Hashtag> hashtags) {
+        this.hashtags = hashtags;
     }
 
     public List<Feed> getFeeds() {
