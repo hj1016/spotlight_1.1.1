@@ -1,20 +1,32 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "프로젝트 역할 정보 DTO")
 public class ProjectRoleDTO {
+    @Schema(description = "프로젝트 역할 ID")
     private Long id;
-    private StudentDTO student;
-    private ProjectDTO project;
+
+    @Schema(description = "학생 ID")
+    private Long userId;
+
+    @Schema(description = "프로젝트 ID")
+    private Long projectId;
+
+    @Schema(description = "역할")
     private String role;
 
-    // 기본 생성자
+    @Schema(description = "초대 수락 여부")
+    private boolean accepted;
+
     public ProjectRoleDTO() {}
 
-    // 매개변수를 받는 생성자
-    public ProjectRoleDTO(Long id, StudentDTO student, ProjectDTO project, String role) {
+    public ProjectRoleDTO(Long id, Long userId, Long projectId, String role, boolean accepted) {
         this.id = id;
-        this.student = student;
-        this.project = project;
+        this.userId = userId;
+        this.projectId = projectId;
         this.role = role;
+        this.accepted = accepted;
     }
 
     // Getters and Setters
@@ -26,20 +38,20 @@ public class ProjectRoleDTO {
         this.id = id;
     }
 
-    public StudentDTO getStudent() {
-        return student;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setStudent(StudentDTO student) {
-        this.student = student;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public ProjectDTO getProject() {
-        return project;
+    public Long getProjectId() {
+        return projectId;
     }
 
-    public void setProject(ProjectDTO project) {
-        this.project = project;
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public String getRole() {
@@ -48,5 +60,13 @@ public class ProjectRoleDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(boolean accepted) {
+        this.accepted = accepted;
     }
 }

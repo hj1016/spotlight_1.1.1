@@ -9,18 +9,20 @@ public class ProjectRole {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @Column(name = "role")
     private String role;
 
-    // Constructors, getters, and setters
+    @Column(nullable = false)
+    private boolean accepted = false; // 초대 수락 여부
 
+    // Constructors, getters, and setters
     public Long getId() {
         return id;
     }
@@ -52,4 +54,8 @@ public class ProjectRole {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public boolean isAccepted() { return accepted; }
+
+    public void setAccepted(boolean accepted) { this.accepted = accepted; }
 }

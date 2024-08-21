@@ -16,9 +16,12 @@ public class Project {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name = "creator_id", referencedColumnName = "id", nullable = false)
+    private User creator;
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Feed> feeds = new HashSet<>();
-
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "student")
@@ -40,6 +43,10 @@ public class Project {
     public void setName(String name) {
         this.name = name;
     }
+
+    public User getCreator() { return creator; }
+
+    public void setCreator(User creator) { this.creator = creator; }
 
     public Set<Feed> getFeeds() {
         return feeds;

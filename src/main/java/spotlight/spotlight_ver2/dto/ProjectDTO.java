@@ -1,24 +1,32 @@
 package spotlight.spotlight_ver2.dto;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.List;
+
+@Schema(description = "프로젝트 정보 DTO")
 public class ProjectDTO {
+    @Schema(description = "프로젝트 ID")
     private Long id;
+
+    @Schema(description = "프로젝트 이름")
     private String name;
-    private Set<FeedDTO> feeds = new HashSet<>();
-    private Map<StudentDTO, ProjectRoleDTO> studentRoles;
+
+    @Schema(description = "프로젝트 생성자")
+    private UserDTO creator;
+
+    @Schema(description = "팀원 역할 리스트")
+    private List<ProjectRoleDTO> projectRoles;
 
     // 기본 생성자
     public ProjectDTO() {}
 
     // 매개변수를 받는 생성자
-    public ProjectDTO(Long id, String name, Set<FeedDTO> feeds, Map<StudentDTO, ProjectRoleDTO> studentRoles) {
+    public ProjectDTO(Long id, String name, UserDTO creator, List<ProjectRoleDTO> projectRoles) {
         this.id = id;
         this.name = name;
-        this.feeds = feeds;
-        this.studentRoles = studentRoles;
+        this.creator = creator;
+        this.projectRoles = projectRoles;
     }
 
     // Getters and Setters
@@ -38,19 +46,19 @@ public class ProjectDTO {
         this.name = name;
     }
 
-    public Set<FeedDTO> getFeeds() {
-        return feeds;
+    public UserDTO getCreator() {
+        return creator;
     }
 
-    public void setFeeds(Set<FeedDTO> feeds) {
-        this.feeds = feeds;
+    public void setCreator(UserDTO creator) {
+        this.creator = creator;
     }
 
-    public Map<StudentDTO, ProjectRoleDTO> getStudentRoles() {
-        return studentRoles;
+    public List<ProjectRoleDTO> getProjectRoles() {
+        return projectRoles;
     }
 
-    public void setStudentRoles(Map<StudentDTO, ProjectRoleDTO> studentRoles) {
-        this.studentRoles = studentRoles;
+    public void setProjectRoles(List<ProjectRoleDTO> projectRoles) {
+        this.projectRoles = projectRoles;
     }
 }
