@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import spotlight.spotlight_ver2.exception.UserNotFoundException;
 import spotlight.spotlight_ver2.exception.InternalServerErrorException;
 import spotlight.spotlight_ver2.service.ExhibitionService;
 
+@Tag(name="전시 정보 API", description = "프로젝트의 전시 정보를 입력받는 API 입니다.")
 @RestController
 @RequestMapping("/api/exhibitions")
 public class ExhibitionController {
@@ -25,7 +27,7 @@ public class ExhibitionController {
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json; charset=UTF-8")
-    @Operation(summary = "createExhibition", description = "전시 정보를 생성합니다.")
+    @Operation(summary = "전시 정보 입력", description = "전시 정보를 생성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "전시 정보가 성공적으로 생성됨"),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
