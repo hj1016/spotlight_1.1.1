@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import spotlight.spotlight_ver2.dto.ExhibitionDTO;
-import spotlight.spotlight_ver2.exception.UserNotFoundException;
+import spotlight.spotlight_ver2.exception.NotFoundException;
 import spotlight.spotlight_ver2.exception.InternalServerErrorException;
 import spotlight.spotlight_ver2.service.ExhibitionService;
 
@@ -66,7 +66,7 @@ class ExhibitionControllerTest {
         ExhibitionDTO exhibitionDTO = new ExhibitionDTO();
         exhibitionDTO.setUserId(1L);
 
-        when(exhibitionService.createExhibition(any(ExhibitionDTO.class))).thenThrow(new UserNotFoundException("사용자를 찾을 수 없습니다."));
+        when(exhibitionService.createExhibition(any(ExhibitionDTO.class))).thenThrow(new NotFoundException("사용자를 찾을 수 없습니다."));
 
         mockMvc.perform(post("/api/exhibitions")
                         .contentType(MediaType.APPLICATION_JSON)

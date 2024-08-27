@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.ExhibitionDTO;
 import spotlight.spotlight_ver2.response.ErrorResponse;
 import spotlight.spotlight_ver2.response.ExhibitionResponse;
-import spotlight.spotlight_ver2.exception.UserNotFoundException;
+import spotlight.spotlight_ver2.exception.NotFoundException;
 import spotlight.spotlight_ver2.exception.InternalServerErrorException;
 import spotlight.spotlight_ver2.service.ExhibitionService;
 
@@ -37,7 +37,7 @@ public class ExhibitionController {
         try {
             ExhibitionDTO createdExhibition = exhibitionService.createExhibition(exhibitionDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(new ExhibitionResponse(true, createdExhibition));
-        } catch (UserNotFoundException e) {
+        } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (InternalServerErrorException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(e.getMessage()));

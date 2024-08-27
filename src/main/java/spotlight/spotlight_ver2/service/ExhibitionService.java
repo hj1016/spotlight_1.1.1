@@ -4,8 +4,7 @@ import org.springframework.stereotype.Service;
 import spotlight.spotlight_ver2.dto.ExhibitionDTO;
 import spotlight.spotlight_ver2.entity.Exhibition;
 import spotlight.spotlight_ver2.entity.User;
-import spotlight.spotlight_ver2.entity.Feed;
-import spotlight.spotlight_ver2.exception.UserNotFoundException;
+import spotlight.spotlight_ver2.exception.NotFoundException;
 import spotlight.spotlight_ver2.exception.InternalServerErrorException;
 import spotlight.spotlight_ver2.repository.ExhibitionRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
@@ -23,7 +22,7 @@ public class ExhibitionService {
 
     public ExhibitionDTO createExhibition(ExhibitionDTO exhibitionDTO) {
         User user = userRepository.findById(exhibitionDTO.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
         Exhibition exhibition = new Exhibition();
         exhibition.setLocation(exhibitionDTO.getLocation());

@@ -9,7 +9,7 @@ import spotlight.spotlight_ver2.dto.ExhibitionDTO;
 import spotlight.spotlight_ver2.entity.Exhibition;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.entity.Feed;
-import spotlight.spotlight_ver2.exception.UserNotFoundException;
+import spotlight.spotlight_ver2.exception.NotFoundException;
 import spotlight.spotlight_ver2.exception.InternalServerErrorException;
 import spotlight.spotlight_ver2.repository.ExhibitionRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
@@ -85,7 +85,7 @@ public class ExhibitionServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
             exhibitionService.createExhibition(exhibitionDTO);
         });
         assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());

@@ -31,11 +31,11 @@ public class ProjectService {
     public ProjectRole inviteTeamMember(Long projectId, Long studentId, String role) {
         // 프로젝트를 ID로 조회
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException("프로젝트를 찾을 수 없습니다. ID: " + projectId));
+                .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다. ID: " + projectId));
 
         // 학생을 ID로 조회
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new StudentNotFoundException("학생을 찾을 수 없습니다. ID: " + studentId));
+                .orElseThrow(() -> new NotFoundException("학생을 찾을 수 없습니다. ID: " + studentId));
 
         // 새로운 ProjectRole 객체 생성
         ProjectRole projectRole = new ProjectRole();
@@ -62,7 +62,7 @@ public class ProjectService {
     public void acceptInvitation(Long projectRoleId) {
         // ProjectRole을 ID로 조회
         ProjectRole projectRole = projectRoleRepository.findById(projectRoleId)
-                .orElseThrow(() -> new ProjectRoleNotFoundException("ProjectRole을 찾을 수 없습니다. ID: " + projectRoleId));
+                .orElseThrow(() -> new NotFoundException("ProjectRole을 찾을 수 없습니다. ID: " + projectRoleId));
 
         // 초대 수락 상태로 변경
         projectRole.setAccepted(true);
