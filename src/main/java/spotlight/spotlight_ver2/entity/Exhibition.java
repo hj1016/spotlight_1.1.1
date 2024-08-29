@@ -29,6 +29,19 @@ public class Exhibition {
     @JsonManagedReference
     private Feed feed;
 
+    // 기본 생성자
+    public Exhibition() {}
+
+    // 매개변수를 받는 생성자
+    public Exhibition(Long exhibitionId, String location, String schedule, String time, User user, Feed feed) {
+        this.exhibitionId = exhibitionId;
+        this.location = location;
+        this.schedule = schedule;
+        this.time = time;
+        this.user = user;
+        this.feed = feed;
+    }
+
     public Long getExhibitionId() {
         return exhibitionId;
     }

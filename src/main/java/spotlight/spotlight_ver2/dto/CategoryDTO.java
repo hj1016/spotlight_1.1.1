@@ -1,12 +1,13 @@
 package spotlight.spotlight_ver2.dto;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class CategoryDTO {
     private Long id;
     private String name;
     private CategoryDTO parent;
-    private Set<FeedDTO> feeds;
+    private Set<FeedDTO> feeds = new HashSet<>();
 
     // 기본 생성자
     public CategoryDTO() {}

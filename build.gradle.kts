@@ -19,14 +19,18 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation ("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation ("org.springframework.boot:spring-boot-starter-web")
-    implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    compileOnly ("org.projectlombok:lombok:1.18.34")
-    annotationProcessor ("org.projectlombok:lombok:1.18.34")
-    runtimeOnly ("com.mysql:mysql-connector-j")
+
+    compileOnly("org.projectlombok:lombok:1.18.34")
+    annotationProcessor("org.projectlombok:lombok:1.18.34")
+    implementation("org.mapstruct:mapstruct:1.5.4.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.4.Final")
+    runtimeOnly("com.mysql:mysql-connector-j")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.h2database:h2")
