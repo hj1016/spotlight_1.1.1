@@ -1,6 +1,7 @@
 package spotlight.spotlight_ver2.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.FeedDTO;
 import spotlight.spotlight_ver2.entity.Feed;
+import spotlight.spotlight_ver2.entity.Stage;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.exception.*;
 import spotlight.spotlight_ver2.repository.UserRepository;
@@ -20,6 +22,7 @@ import spotlight.spotlight_ver2.service.FeedService;
 import spotlight.spotlight_ver2.service.SearchHistoryService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/feeds")
@@ -186,6 +189,90 @@ public class FeedController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>("서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Operation(summary = "피드 조회수 집계", description = "사용자별 피드 조회수를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회수 집계 성공"),
+            @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/{feedId}/hits")
+    public ResponseEntity<?> incrementFeedHits(
+            @PathVariable @Parameter(description = "피드 ID") Long feedId) {
+        try {
+            // 현재 인증된 사용자 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User currentUser = (User) authentication.getPrincipal();
+
+            FeedDTO feedDTO = feedService.incrementHits(feedId, currentUser);
+            return ResponseEntity.ok(feedDTO);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.");
+        }
+    }
+
+    @Operation(summary = "피드 스크랩", description = "피드를 스크랩합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "스크랩 성공"),
+            @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음"),
+            @ApiResponse(responseCode = "400", description = "이미 스크랩된 피드"),
+            @ApiResponse(responseCode = "401", description = "권한 없음")
+    })
+    @PostMapping("/{feedId}/scrap")
+    public ResponseEntity<?> scrapFeed(
+            @PathVariable Long feedId,
+            @RequestParam Long stageId,
+            @RequestParam Long scrappedUserId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User currentUser = (User) authentication.getPrincipal();
+
+            Stage stage = new Stage(); // stageId를 바탕으로 Stage 객체를 조회하는 로직을 추가해야 함
+            stage.setId(stageId); // 간단하게 id 설정으로 처리
+
+            User scrappedUser = userRepository.findById(scrappedUserId)
+                    .orElseThrow(() -> new NotFoundException("스크랩된 사용자를 찾을 수 없습니다."));
+
+            Map<String, Object> response = feedService.scrapFeed(feedId, currentUser, stage, scrappedUser);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
+        }
+    }
+
+    @Operation(summary = "피드 스크랩 취소", description = "피드의 스크랩을 취소합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "스크랩 취소 성공"),
+            @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음"),
+            @ApiResponse(responseCode = "400", description = "스크랩되지 않은 피드"),
+            @ApiResponse(responseCode = "401", description = "권한 없음")
+    })
+    @DeleteMapping("/{feedId}/unscrap")
+    public ResponseEntity<?> unscrapFeed(@PathVariable Long feedId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User currentUser = (User) authentication.getPrincipal();
+
+            Map<String, Object> response = feedService.unscrapFeed(feedId, currentUser);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
         }
     }
 }

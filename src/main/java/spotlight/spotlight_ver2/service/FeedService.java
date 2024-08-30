@@ -1,18 +1,20 @@
 package spotlight.spotlight_ver2.service;
 
 import spotlight.spotlight_ver2.dto.*;
-import spotlight.spotlight_ver2.entity.Feed;
-import spotlight.spotlight_ver2.entity.Hashtag;
-import spotlight.spotlight_ver2.entity.User;
+import spotlight.spotlight_ver2.entity.*;
+import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.*;
 import spotlight.spotlight_ver2.mapper.FeedMapper;
 import spotlight.spotlight_ver2.repository.FeedRepository;
 import spotlight.spotlight_ver2.repository.HashtagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import spotlight.spotlight_ver2.repository.ScrapRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,14 +25,16 @@ public class FeedService {
     private final HashtagRepository hashtagRepository;
     private final SearchHistoryService searchHistoryService;
     private final UserRepository userRepository;
+    private final ScrapRepository scrapRepository;
     private final FeedMapper feedMapper = FeedMapper.INSTANCE;
 
     @Autowired
-    public FeedService(FeedRepository feedRepository, HashtagRepository hashtagRepository, SearchHistoryService searchHistoryService, UserRepository userRepository) {
+    public FeedService(FeedRepository feedRepository, HashtagRepository hashtagRepository, SearchHistoryService searchHistoryService, UserRepository userRepository, ScrapRepository scrapRepository) {
         this.feedRepository = feedRepository;
         this.hashtagRepository = hashtagRepository;
         this.searchHistoryService = searchHistoryService;
         this.userRepository = userRepository;
+        this.scrapRepository = scrapRepository;
     }
 
     public FeedDTO createFeed(FeedDTO feedDTO) {
@@ -110,14 +114,6 @@ public class FeedService {
         return url.startsWith("http://") || url.startsWith("https://");
     }
 
-    /**
-     * 해시태그로 피드를 검색하는 메서드
-     *
-     * @param hashtag 검색할 해시태그
-     * @return 해시태그가 포함된 피드 목록
-     * @throws NotFoundException 해시태그를 찾을 수 없는 경우 발생
-     * @throws SearchHistoryException 검색 중 오류 발생 시 발생
-     */
     public List<FeedDTO> searchFeedsByHashtag(String hashtag) {
         try {
             // 해시태그를 검색
@@ -140,5 +136,65 @@ public class FeedService {
         } catch (Exception e) {
             throw new SearchHistoryException("피드를 검색하는 동안 오류가 발생했습니다: " + e.getMessage());
         }
+    }
+
+    public FeedDTO incrementHits(Long feedId, User user) {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new NotFoundException("피드를 찾을 수 없습니다."));
+
+        if (user.getRole() == Role.NORMAL || user.getRole() == Role.STUDENT) {
+            feed.setHitsUser(feed.getHitsUser() + 1);
+        } else if (user.getRole() == Role.RECRUITER) {
+            feed.setHitsRecruiter(feed.getHitsRecruiter() + 1);
+        }
+
+        feedRepository.save(feed);
+
+        FeedDTO feedDTO = feedMapper.toDTO(feed);
+        feedDTO.setHitsUser(feed.getHitsUser());
+        feedDTO.setHitsRecruiter(feed.getHitsRecruiter());
+        return feedDTO;
+    }
+
+    public Map<String, Object> scrapFeed(Long feedId, User user, Stage stage, User scrappedUser) {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new NotFoundException("스크랩할 게시물을 찾을 수 없습니다."));
+
+        if (scrapRepository.existsByUserAndFeed(user, feed)) {
+            throw new BadRequestException("이미 이 게시물을 스크랩했습니다.");
+        }
+
+        Scrap scrap = new Scrap();
+        scrap.setUser(user);
+        scrap.setFeed(feed);
+        scrap.setStageId(stage);
+        scrap.setScrappedUser(scrappedUser);
+        scrapRepository.save(scrap);
+
+        feed.setScrap(feed.getScrap() + 1); // 스크랩 수 증가
+        feedRepository.save(feed);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "게시물이 성공적으로 스크랩되었습니다.");
+        return response;
+    }
+
+    public Map<String, Object> unscrapFeed(Long feedId, User user) {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new NotFoundException("스크랩을 취소할 게시물을 찾을 수 없습니다."));
+
+        Scrap scrap = scrapRepository.findByUserAndFeed(user, feed)
+                .orElseThrow(() -> new BadRequestException("스크랩하지 않은 게시물입니다."));
+
+        scrapRepository.delete(scrap);
+
+        feed.setScrap(feed.getScrap() - 1); // 스크랩 수 감소
+        feedRepository.save(feed);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "게시물 스크랩이 성공적으로 취소되었습니다.");
+        return response;
     }
 }
