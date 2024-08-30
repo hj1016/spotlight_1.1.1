@@ -13,17 +13,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors().and() // CORS 설정 적용
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll() // Swagger UI 관련 경로 허용
-                                .requestMatchers("/api/exhibitions/**").permitAll() // 전시 정보 API에 대한 접근 허용
-                                .requestMatchers("/api/projects/**").permitAll() // 프로젝트 API에 대한 접근 허용
-                                .requestMatchers("/api/feeds/**").permitAll() // 피드 API에 대한 접근 허용
-                                .requestMatchers("/api/search/**").permitAll() // 검색 API에 대한 접근 허용
-                                .anyRequest().authenticated() // 나머지 요청은 인증 필요
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin()) // SAMEORIGIN 허용
                 )
-                .csrf().disable(); // 필요시 CSRF 보호 비활성화
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .anyRequest().permitAll()
+                )
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
