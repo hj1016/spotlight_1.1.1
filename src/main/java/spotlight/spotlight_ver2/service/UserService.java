@@ -1,9 +1,11 @@
 package spotlight.spotlight_ver2.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import spotlight.spotlight_ver2.dto.PasswordValidationResponseDTO;
 import spotlight.spotlight_ver2.dto.UserRegistrationDTO;
 import spotlight.spotlight_ver2.entity.Recruiter;
@@ -13,7 +15,10 @@ import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.repository.RecruiterRepository;
 import spotlight.spotlight_ver2.repository.StudentRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
+import spotlight.spotlight_ver2.request.CertificationRequest;
+import spotlight.spotlight_ver2.response.CertificationResponse;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -23,13 +28,17 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RecruiterRepository recruiterRepository;
     private final StudentRepository studentRepository;
+    private final UploadImageService uploadImageService;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public UserService(UserRepository userRepository, RecruiterRepository recruiterRepository, StudentRepository studentRepository) {
+    public UserService(UserRepository userRepository, RecruiterRepository recruiterRepository, StudentRepository studentRepository, UploadImageService uploadImageService) {
         this.userRepository = userRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.recruiterRepository = recruiterRepository;
         this.studentRepository = studentRepository;
+        this.uploadImageService = uploadImageService;
     }
 
     // 이메일 중복 검사
@@ -125,4 +134,30 @@ public class UserService {
             throw new RuntimeException("사용자 등록에 실패했습니다.");
         }
     }
+
+    // 학생 재학증명서 업로드
+
+/*
+    // 리크루터 재직증명서 업로드
+    public CertificationResponse uploadCertification(User user, CertificationRequest certificationRequest) {
+        CertificationResponse certificationResponse = new CertificationResponse();
+        String imageUrl;
+        MultipartFile certification = certificationRequest.getCertification();
+        Optional<Recruiter> recruiterOptional = recruiterRepository.findById(user.getId());
+
+        if (certification != null && !certification.isEmpty() && recruiterOptional.isPresent()) {
+            try {
+                imageUrl = uploadImageService.uploadImage(certification);
+                long id = user.getId();
+                String sql = "UPDATE recruiter set certification = ? where id = ?";
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        certificationResponse.setCertification(imageUrl);
+        certificationResponse.setSuccess(true);
+        return certificationResponse;
+    }
+    // 위 문제 해결 후 return false 작성
+*/
 }

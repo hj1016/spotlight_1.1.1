@@ -29,12 +29,13 @@ public class Student {
     @Column(name = "pf_path")
     private String portfolioImage;
 
+    @Column
+    private String enrollmentCertification;
+
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Proposal> proposals = new ArrayList<>();
 
-    public Long getUserId() {
-        return userId;
-    }
+    public Long getUserId() { return userId; }
 
     public void setUserId(Long userId) {
         this.userId = userId;
@@ -56,21 +57,15 @@ public class Student {
         this.school = school;
     }
 
-    public String getMajor() {
-        return major;
-    }
+    public String getMajor() { return major; }
 
     public void setMajor(String major) {
         this.major = major;
     }
 
-    public Set<ProjectRole> getProjectRoles() {
-        return projectRoles;
-    }
+    public Set<ProjectRole> getProjectRoles() { return projectRoles; }
 
-    public void setProjectRoles(Set<ProjectRole> projectRoles) {
-        this.projectRoles = projectRoles;
-    }
+    public void setProjectRoles(Set<ProjectRole> projectRoles) { this.projectRoles = projectRoles; }
 
     public String getPortfolioImage() {
         return portfolioImage;
@@ -79,6 +74,10 @@ public class Student {
     public void setPortfolioImage(String portfolioImage) {
         this.portfolioImage = portfolioImage;
     }
+
+    public String getEnrollmentCertification() { return enrollmentCertification; }
+
+    public void setEnrollmentCertification(String enrollmentCertification) { this.enrollmentCertification = enrollmentCertification; }
 
     public List<Proposal> getProposals() {
         return proposals;
