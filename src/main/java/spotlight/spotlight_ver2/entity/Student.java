@@ -12,19 +12,11 @@ public class Student {
     @Id
     private Long userId;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
-    private User user;
-
     @Column(nullable = false)
     private String school;
 
     @Column(nullable = false)
     private String major;
-
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ProjectRole> projectRoles = new HashSet<>();
 
     @Column(name = "pf_path")
     private String portfolioImage;
@@ -32,21 +24,21 @@ public class Student {
     @Column
     private String enrollmentCertification;
 
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
+    private User user;
+
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Proposal> proposals = new ArrayList<>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProjectRole> projectRoles = new HashSet<>();
 
     public Long getUserId() { return userId; }
 
     public void setUserId(Long userId) {
         this.userId = userId;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public String getSchool() {
@@ -63,10 +55,6 @@ public class Student {
         this.major = major;
     }
 
-    public Set<ProjectRole> getProjectRoles() { return projectRoles; }
-
-    public void setProjectRoles(Set<ProjectRole> projectRoles) { this.projectRoles = projectRoles; }
-
     public String getPortfolioImage() {
         return portfolioImage;
     }
@@ -79,6 +67,14 @@ public class Student {
 
     public void setEnrollmentCertification(String enrollmentCertification) { this.enrollmentCertification = enrollmentCertification; }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public List<Proposal> getProposals() {
         return proposals;
     }
@@ -86,4 +82,8 @@ public class Student {
     public void setProposals(List<Proposal> proposals) {
         this.proposals = proposals;
     }
+
+    public Set<ProjectRole> getProjectRoles() { return projectRoles; }
+
+    public void setProjectRoles(Set<ProjectRole> projectRoles) { this.projectRoles = projectRoles; }
 }

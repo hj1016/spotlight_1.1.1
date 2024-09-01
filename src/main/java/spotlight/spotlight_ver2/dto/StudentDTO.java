@@ -8,20 +8,24 @@ public class StudentDTO {
     private String school;
     private String major;
     private String portfolioImage;
-    private Set<ProjectRoleDTO> projectRoles;
+    private String enrollmentCertification;
+    private UserDTO user;
     private List<ProposalDTO> proposals;
+    private Set<ProjectRoleDTO> projectRoles;
 
     // 기본 생성자
     public StudentDTO() {}
 
     // 매개변수를 받는 생성자
-    public StudentDTO(Long userId, String school, String major, String portfolioImage, Set<ProjectRoleDTO> projectRoles, List<ProposalDTO> proposals) {
+    public StudentDTO(Long userId, String school, String major, String portfolioImage, String enrollmentCertification, UserDTO user, List<ProposalDTO> proposals, Set<ProjectRoleDTO> projectRoles) {
         this.userId = userId;
         this.school = school;
         this.major = major;
         this.portfolioImage = portfolioImage;
-        this.projectRoles = projectRoles;
+        this.enrollmentCertification = enrollmentCertification;
+        this.user = user;
         this.proposals = proposals;
+        this.projectRoles = projectRoles;
     }
 
     // Getters and Setters
@@ -49,13 +53,21 @@ public class StudentDTO {
         this.major = major;
     }
 
-    public String getPortfolioImage() {
-        return portfolioImage;
-    }
+    public String getPortfolioImage() { return portfolioImage; }
 
-    public void setPortfolioImage(String portfolioImage) {
-        this.portfolioImage = portfolioImage;
-    }
+    public void setPortfolioImage(String portfolioImage) { this.portfolioImage = portfolioImage; }
+
+    public String getEnrollmentCertification() { return enrollmentCertification; }
+
+    public void setEnrollmentCertification(String enrollmentCertification) { this.enrollmentCertification = enrollmentCertification; }
+
+    public UserDTO getUser() { return user; }
+
+    public void setUser(UserDTO user) { this.user = user; }
+
+    public List<ProposalDTO> getProposals() { return proposals; }
+
+    public void setProposals(List<ProposalDTO> proposals) { this.proposals = proposals; }
 
     public Set<ProjectRoleDTO> getProjectRoles() {
         return projectRoles;
@@ -63,13 +75,5 @@ public class StudentDTO {
 
     public void setProjectRoles(Set<ProjectRoleDTO> projectRoles) {
         this.projectRoles = projectRoles;
-    }
-
-    public List<ProposalDTO> getProposals() {
-        return proposals;
-    }
-
-    public void setProposals(List<ProposalDTO> proposals) {
-        this.proposals = proposals;
     }
 }

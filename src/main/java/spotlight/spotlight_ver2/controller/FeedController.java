@@ -12,13 +12,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.FeedDTO;
-import spotlight.spotlight_ver2.entity.Feed;
+import spotlight.spotlight_ver2.dto.StudentDTO;
 import spotlight.spotlight_ver2.entity.Stage;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.exception.*;
 import spotlight.spotlight_ver2.repository.UserRepository;
 import spotlight.spotlight_ver2.response.ErrorResponse;
 import spotlight.spotlight_ver2.service.FeedService;
+import spotlight.spotlight_ver2.service.ScrapService;
 import spotlight.spotlight_ver2.service.SearchHistoryService;
 
 import java.util.List;
@@ -35,12 +36,17 @@ public class FeedController {
     private final SearchHistoryService searchHistoryService;
 
     @Autowired
+    private final ScrapService scrapService;
+
+
+    @Autowired
     private final UserRepository userRepository;
 
     @Autowired
-    public FeedController(FeedService feedService, SearchHistoryService searchHistoryService, UserRepository userRepository) {
+    public FeedController(FeedService feedService, SearchHistoryService searchHistoryService, ScrapService scrapService, UserRepository userRepository) {
         this.feedService = feedService;
         this.searchHistoryService = searchHistoryService;
+        this.scrapService = scrapService;
         this.userRepository = userRepository;
     }
 
@@ -237,7 +243,7 @@ public class FeedController {
             User scrappedUser = userRepository.findById(scrappedUserId)
                     .orElseThrow(() -> new NotFoundException("스크랩된 사용자를 찾을 수 없습니다."));
 
-            Map<String, Object> response = feedService.scrapFeed(feedId, currentUser, stage, scrappedUser);
+            Map<String, Object> response = scrapService.scrapFeed(feedId, currentUser, stage, scrappedUser);
             return ResponseEntity.ok(response);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -257,13 +263,13 @@ public class FeedController {
             @ApiResponse(responseCode = "400", description = "스크랩되지 않은 피드"),
             @ApiResponse(responseCode = "401", description = "권한 없음")
     })
-    @DeleteMapping("/{feedId}/unscrap")
+    @DeleteMapping("/{feedId}/scrap")
     public ResponseEntity<?> unscrapFeed(@PathVariable Long feedId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User currentUser = (User) authentication.getPrincipal();
 
-            Map<String, Object> response = feedService.unscrapFeed(feedId, currentUser);
+            Map<String, Object> response = scrapService.unscrapFeed(feedId, currentUser);
             return ResponseEntity.ok(response);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -271,6 +277,95 @@ public class FeedController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
+        }
+    }
+
+    @Operation(summary = "프로젝트 팀원 조회", description = "특정 피드에 속한 팀원 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공적으로 팀원 목록을 조회했습니다."),
+            @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/{feedId}/team-members")
+    public ResponseEntity<?> getProjectTeamMembers(@PathVariable Long feedId) {
+        try {
+            // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            // User currentUser = (User) authentication.getPrincipal();
+
+            List<StudentDTO> teamMembers = feedService.getProjectTeamMembers(feedId);
+            return ResponseEntity.ok(teamMembers);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
+        }
+    }
+
+    @Operation(summary = "학생 스크랩", description = "학생을 스크랩합니다. 스크랩 기능은 RECRUITER 역할을 가진 사용자만 사용할 수 있습니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "학생을 성공적으로 스크랩했습니다."),
+            @ApiResponse(responseCode = "401", description = "사용자가 인증되지 않았습니다."),
+            @ApiResponse(responseCode = "400", description = "이미 스크랩한 학생입니다."),
+            @ApiResponse(responseCode = "404", description = "학생을 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/{feedId}/students/{studentId}/scrap")
+    public ResponseEntity<?> scrapStudent(@PathVariable Long feedId, @PathVariable Long studentId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User currentUser = (User) authentication.getPrincipal();
+
+            // Feed 존재 여부 체크
+            if (!feedService.existsById(feedId)) {
+                throw new NotFoundException("스크랩할 학생을 찾을 수 없습니다.");
+            }
+
+            // 스크랩 기능 호출
+            scrapService.scrapStudent(studentId, currentUser);
+
+            return ResponseEntity.ok("학생을 스크랩했습니다.");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
+        }
+    }
+
+    @Operation(summary = "학생 스크랩 취소", description = "학생 스크랩을 취소합니다. 스크랩 취소 기능은 RECRUITER 역할을 가진 사용자만 사용할 수 있습니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "학생 스크랩을 성공적으로 취소했습니다."),
+            @ApiResponse(responseCode = "401", description = "사용자가 인증되지 않았습니다."),
+            @ApiResponse(responseCode = "400", description = "스크랩하지 않은 학생입니다."),
+            @ApiResponse(responseCode = "404", description = "학생을 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @DeleteMapping("/{feedId}/students/{studentId}/scrap")
+    public ResponseEntity<?> unsrapStudent(@PathVariable Long feedId, @PathVariable Long studentId) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User currentUser = (User) authentication.getPrincipal();
+
+            // Feed 존재 여부 체크
+            if (!feedService.existsById(feedId)) {
+                throw new NotFoundException("스크랩할 게시물을 찾을 수 없습니다.");
+            }
+
+            // 스크랩 취소 기능 호출
+            scrapService.unsrapStudent(studentId, currentUser);
+
+            return ResponseEntity.ok("학생 스크랩을 취소했습니다.");
+        } catch (UnauthorizedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
         }

@@ -5,6 +5,7 @@ import spotlight.spotlight_ver2.entity.*;
 import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.*;
 import spotlight.spotlight_ver2.mapper.FeedMapper;
+import spotlight.spotlight_ver2.mapper.StudentMapper;
 import spotlight.spotlight_ver2.repository.FeedRepository;
 import spotlight.spotlight_ver2.repository.HashtagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class FeedService {
     private final UserRepository userRepository;
     private final ScrapRepository scrapRepository;
     private final FeedMapper feedMapper = FeedMapper.INSTANCE;
+    private final StudentMapper studentMapper = StudentMapper.INSTANCE;
 
     @Autowired
     public FeedService(FeedRepository feedRepository, HashtagRepository hashtagRepository, SearchHistoryService searchHistoryService, UserRepository userRepository, ScrapRepository scrapRepository) {
@@ -156,45 +158,17 @@ public class FeedService {
         return feedDTO;
     }
 
-    public Map<String, Object> scrapFeed(Long feedId, User user, Stage stage, User scrappedUser) {
+    public List<StudentDTO> getProjectTeamMembers(Long feedId) {
         Feed feed = feedRepository.findById(feedId)
-                .orElseThrow(() -> new NotFoundException("스크랩할 게시물을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("ID가 있는 피드를 찾을 수 없습니다: " + feedId));
 
-        if (scrapRepository.existsByUserAndFeed(user, feed)) {
-            throw new BadRequestException("이미 이 게시물을 스크랩했습니다.");
-        }
-
-        Scrap scrap = new Scrap();
-        scrap.setUser(user);
-        scrap.setFeed(feed);
-        scrap.setStageId(stage);
-        scrap.setScrappedUser(scrappedUser);
-        scrapRepository.save(scrap);
-
-        feed.setScrap(feed.getScrap() + 1); // 스크랩 수 증가
-        feedRepository.save(feed);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "게시물이 성공적으로 스크랩되었습니다.");
-        return response;
+        return feed.getProject().getStudentRoles().values().stream()
+                .map(ProjectRole::getStudent)
+                .map(StudentMapper.INSTANCE::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Map<String, Object> unscrapFeed(Long feedId, User user) {
-        Feed feed = feedRepository.findById(feedId)
-                .orElseThrow(() -> new NotFoundException("스크랩을 취소할 게시물을 찾을 수 없습니다."));
-
-        Scrap scrap = scrapRepository.findByUserAndFeed(user, feed)
-                .orElseThrow(() -> new BadRequestException("스크랩하지 않은 게시물입니다."));
-
-        scrapRepository.delete(scrap);
-
-        feed.setScrap(feed.getScrap() - 1); // 스크랩 수 감소
-        feedRepository.save(feed);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "게시물 스크랩이 성공적으로 취소되었습니다.");
-        return response;
+    public boolean existsById(Long feedId) {
+        return feedRepository.existsById(feedId);
     }
 }
