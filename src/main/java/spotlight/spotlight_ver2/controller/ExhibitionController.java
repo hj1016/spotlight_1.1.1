@@ -15,9 +15,9 @@ import spotlight.spotlight_ver2.exception.NotFoundException;
 import spotlight.spotlight_ver2.exception.InternalServerErrorException;
 import spotlight.spotlight_ver2.service.ExhibitionService;
 
-@Tag(name="전시 정보 API", description = "프로젝트의 전시 정보를 입력받는 API 입니다.")
 @RestController
 @RequestMapping("/api/exhibitions")
+@Tag(name="전시 정보 API", description = "프로젝트의 전시 정보를 입력받는 API 입니다.")
 public class ExhibitionController {
 
     private final ExhibitionService exhibitionService;

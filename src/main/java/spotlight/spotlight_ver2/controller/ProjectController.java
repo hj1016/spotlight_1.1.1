@@ -15,9 +15,9 @@ import spotlight.spotlight_ver2.exception.NotFoundException;
 import spotlight.spotlight_ver2.service.ProjectService;
 import spotlight.spotlight_ver2.service.UserService;
 
-@Tag(name="프로젝트 API", description = "프로젝트 생성자가 팀원을 초대하는 API 입니다.")
 @RestController
 @RequestMapping("/api/projects")
+@Tag(name="프로젝트 API", description = "프로젝트 생성자가 팀원을 초대하는 API 입니다.")
 public class ProjectController {
 
     private final ProjectService projectService;
