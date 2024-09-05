@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "프로젝트 역할 정보 DTO")
 public class ProjectRoleDTO {
+
     @Schema(description = "프로젝트 역할 ID")
     private Long id;
 

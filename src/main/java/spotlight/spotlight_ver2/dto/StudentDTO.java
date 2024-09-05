@@ -1,16 +1,35 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 import java.util.Set;
 
+@Schema(description = "학생 DTO")
 public class StudentDTO {
+
+    @Schema(description = "사용자 ID", example = "1")
     private Long userId;
+
+    @Schema(description = "학교", example = "서울여자대학교")
     private String school;
+
+    @Schema(description = "전공", example = "소프트웨어융합학과")
     private String major;
+
+    @Schema(description = "포트폴리오 이미지 URL", example = "http://example.com/portfolio.jpg")
     private String portfolioImage;
+
+    @Schema(description = "재학 증명서 URL", example = "http://example.com/enrollment-cert.jpg")
     private String enrollmentCertification;
+
+    @Schema(description = "사용자 정보", implementation = UserDTO.class)
     private UserDTO user;
+
+    @Schema(description = "제안서 목록", implementation = ProposalDTO.class)
     private List<ProposalDTO> proposals;
+
+    @Schema(description = "프로젝트 역할 목록", implementation = ProjectRoleDTO.class)
     private Set<ProjectRoleDTO> projectRoles;
 
     // 기본 생성자

@@ -1,10 +1,23 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "스크랩 DTO")
 public class ScrapDTO {
+
+    @Schema(description = "스크랩 ID", example = "1")
     private Long scrapId;
+
+    @Schema(description = "스크랩한 사용자 정보", implementation = UserDTO.class)
     private UserDTO user;
+
+    @Schema(description = "스크랩된 피드 정보", implementation = FeedDTO.class)
     private FeedDTO feed;
+
+    @Schema(description = "스크랩된 스테이지 정보", implementation = StageDTO.class)
     private StageDTO stageId;
+
+    @Schema(description = "스크랩된 인재 정보", implementation = UserDTO.class)
     private UserDTO scrappedUser;
 
     // 기본 생성자

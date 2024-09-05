@@ -1,35 +1,68 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.sql.Timestamp;
 import java.util.Set;
 
+@Schema(description = "피드 DTO")
 public class FeedDTO {
+
+    @Schema(description = "피드 ID", example = "1")
     private Long feedId;
+
+    @Schema(description = "피드 제목", example = "Feed Title")
     private String title;
-    private String thiumbnailImage;
+
+    @Schema(description = "썸네일 이미지 URL", example = "http://example.com/thumbnail.jpg")
+    private String thumbnailImage;
+
+    @Schema(description = "피드 이미지 URLemf", example = "[\"http://example.com/image1.jpg\", \"http://example.com/image2.jpg\"]")
     private String feedImages;
+
+    @Schema(description = "피드 내용", example = "This is the content of the feed.")
     private String content;
+
+    @Schema(description = "스크랩 수", example = "123")
     private Integer scrap;
+
+    @Schema(description = "사용자 조회 수", example = "456")
     private Integer hitsUser;
+
+    @Schema(description = "리크루터 조회 수", example = "789")
     private Integer hitsRecruiter;
+
+    @Schema(description = "카테고리", implementation = CategoryDTO.class)
     private CategoryDTO category;
+
+    @Schema(description = "생성 일자", example = "2024-09-06T12:00:00Z")
     private Timestamp createdDate;
+
+    @Schema(description = "수정 일자", example = "2024-09-06T12:00:00Z")
     private Timestamp modifiedDate;
+
+    @Schema(description = "사용자 정보", implementation = UserDTO.class)
     private UserDTO user;
+
+    @Schema(description = "전시 정보", implementation = ExhibitionDTO.class)
     private ExhibitionDTO exhibition;
+
+    @Schema(description = "프로젝트 정보", implementation = ProjectDTO.class)
     private ProjectDTO project;
+
+    @Schema(description = "해시태그 집합", implementation = HashtagDTO.class)
     private Set<HashtagDTO> hashtags;
 
     // 기본 생성자
     public FeedDTO() {}
 
     // 매개변수를 받는 생성자
-    public FeedDTO(Long feedId, String title, String thiumbnailImage, String feedImages, String content, Integer scrap,
+    public FeedDTO(Long feedId, String title, String thumbnailImage, String feedImages, String content, Integer scrap,
                    Integer hitsUser, Integer hitsRecruiter, CategoryDTO category, Timestamp createdDate, Timestamp modifiedDate,
                    UserDTO user, ExhibitionDTO exhibition, ProjectDTO project, Set<HashtagDTO> hashtags) {
         this.feedId = feedId;
         this.title = title;
-        this.thiumbnailImage = thiumbnailImage;
+        this.thumbnailImage = thumbnailImage;
         this.feedImages = feedImages;
         this.content = content;
         this.scrap = scrap;
@@ -61,12 +94,12 @@ public class FeedDTO {
         this.title = title;
     }
 
-    public String getThiumbnailImage() {
-        return thiumbnailImage;
+    public String getThumbnailImage() {
+        return thumbnailImage;
     }
 
-    public void setThiumbnailImage(String thiumbnailImage) {
-        this.thiumbnailImage = thiumbnailImage;
+    public void setThumbnailImage(String thiumbnailImage) {
+        this.thumbnailImage = thiumbnailImage;
     }
 
     public String getFeedImages() {

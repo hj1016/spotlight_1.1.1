@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "전시 정보 DTO")
 public class ExhibitionDTO {
+
     @Schema(description = "전시 ID", example = "1")
     private Long exhibitionId;
 

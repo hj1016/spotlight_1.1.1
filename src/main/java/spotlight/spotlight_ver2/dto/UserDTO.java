@@ -1,18 +1,41 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Schema(description = "사용자 정보 DTO")
 public class UserDTO {
+
+    @Schema(description = "사용자 ID", example = "1")
     private Long id;
+
+    @Schema(description = "사용자 이름", example = "김학생")
     private String username;
+
+    @Schema(description = "이메일 주소", example = "김학생@example.com")
     private String email;
+
+    @Schema(description = "사용자 실명", example = "김학생")
     private String name;
+
+    @Schema(description = "프로필 이미지 URL", example = "http://example.com/profile.jpg")
     private String profileImage;
+
+    @Schema(description = "계정 생성 일자", example = "2024-09-06T12:00:00")
     private LocalDateTime createdDate;
+
+    @Schema(description = "계정 수정 일자", example = "2024-09-06T12:00:00")
     private LocalDateTime updatedDate;
+
+    @Schema(description = "샤용자가 사용한 해시태그 목록", implementation = HashtagDTO.class)
     private List<HashtagDTO> hashtags;
+
+    @Schema(description = "사용자가 작성한 피드 목록", implementation = FeedDTO.class)
     private List<FeedDTO> feeds;
+
+    @Schema(description = "사용자가 스크랩한 피드 목록", implementation = ScrapDTO.class)
     private List<ScrapDTO> scraps;
 
     // 기본 생성자

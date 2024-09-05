@@ -1,15 +1,34 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 
+@Schema(description = "제안서 정보 DTO")
 public class ProposalDTO {
+
+    @Schema(description = "제안서 ID", example = "1")
     private Long proposalId;
+
+    @Schema(description = "제안서 직무", example = "Software Developer")
     private String job;
+
+    @Schema(description = "연락처", example = "hisoka@example.com")
     private String contact;
+
+    @Schema(description = "제안서 설명", example = "This is a proposal for a software development position.")
     private String description;
+
+    @Schema(description = "제안서 생성 일자", example = "2024-09-06T12:00:00")
     private LocalDateTime createdDate;
+
+    @Schema(description = "리크루터 정보", implementation = RecruiterDTO.class)
     private RecruiterDTO recruiter;
+
+    @Schema(description = "학생 정보", implementation = StudentDTO.class)
     private StudentDTO student;
+
+    @Schema(description = "제안서 상태", example = "Pending")
     private String status;
 
     // 기본 생성자

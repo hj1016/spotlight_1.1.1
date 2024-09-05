@@ -1,9 +1,20 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "리크루터 DTO")
 public class RecruiterDTO {
+
+    @Schema(description = "사용자 ID", example = "1")
     private Long userId;
+
+    @Schema(description = "사용자 정보", implementation = UserDTO.class)
     private UserDTO user;
+
+    @Schema(description = "회사", example = "네이버")
     private String company;
+
+    @Schema(description = "재직 증명서 URL", example = "http://example.com/certification.jpg")
     private String certification;
 
     // 기본 생성자

@@ -1,6 +1,11 @@
 package spotlight.spotlight_ver2.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "스테이지 DTO")
 public class StageDTO {
+
+    @Schema(description = "스테이지 ID", example = "1")
     private Long id;
 
     // 기본 생성자

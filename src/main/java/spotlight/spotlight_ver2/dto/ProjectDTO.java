@@ -6,6 +6,7 @@ import java.util.List;
 
 @Schema(description = "프로젝트 정보 DTO")
 public class ProjectDTO {
+
     @Schema(description = "프로젝트 ID")
     private Long id;
 
@@ -15,7 +16,7 @@ public class ProjectDTO {
     @Schema(description = "프로젝트 생성자")
     private UserDTO creator;
 
-    @Schema(description = "팀원 역할 리스트")
+    @Schema(description = "팀원 역할 리스트", implementation = ProjectRoleDTO.class)
     private List<ProjectRoleDTO> projectRoles;
 
     // 기본 생성자
