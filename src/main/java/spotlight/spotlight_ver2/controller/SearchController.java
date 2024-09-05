@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/search")
-@Tag(name = "검색 API", description = "검색과 관련 API입니다.")
+@Tag(name = "해시태그 검색 API", description = "해시태그 검색과 관련 API입니다.")
 public class SearchController {
 
     private final FeedService feedService;
