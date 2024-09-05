@@ -98,8 +98,8 @@ public class FeedDTO {
         return thumbnailImage;
     }
 
-    public void setThumbnailImage(String thiumbnailImage) {
-        this.thumbnailImage = thiumbnailImage;
+    public void setThumbnailImage(String thumbnailImage) {
+        this.thumbnailImage = thumbnailImage;
     }
 
     public String getFeedImages() {

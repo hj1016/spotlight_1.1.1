@@ -93,12 +93,12 @@ public class FeedService {
 
     private void validateFeed(Feed feed) {
         if (feed.getTitle() == null || feed.getTitle().isEmpty() ||
-                feed.getThiumbnailImage() == null || feed.getThiumbnailImage().isEmpty() ||
+                feed.getThumbnailImage() == null || feed.getThumbnailImage().isEmpty() ||
                 feed.getContent() == null || feed.getContent().isEmpty()) {
             throw new BadRequestException("게시글 제목, 이미지 URL, 내용은 필수 입력 사항입니다.");
         }
 
-        if (!isValidUrl(feed.getThiumbnailImage())) {
+        if (!isValidUrl(feed.getThumbnailImage())) {
             throw new BadRequestException("유효하지 않은 이미지 URL입니다. 올바른 URL을 입력하세요.");
         }
 

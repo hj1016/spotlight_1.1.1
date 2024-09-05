@@ -18,7 +18,7 @@ public class Feed {
     private String title;
 
     @Column(name = "thumbnail_image")
-    private String thiumbnailImage;
+    private String thumbnailImage;
 
     @Column(name = "feed_images")
     private String feedImages;
@@ -82,8 +82,8 @@ public class Feed {
         this.title = title;
     }
 
-    public String getThiumbnailImage() {
-        return thiumbnailImage;
+    public String getThumbnailImage() {
+        return thumbnailImage;
     }
 
     public String getFeedImages() {
@@ -94,8 +94,8 @@ public class Feed {
         this.feedImages = feedImages;
     }
 
-    public void setThiumbnailImage(String thiumbnailImage) {
-        this.thiumbnailImage = thiumbnailImage;
+    public void setThumbnailImage(String thiumbnailImage) {
+        this.thumbnailImage = thumbnailImage;
     }
 
     public String getContent() {
