@@ -2,6 +2,9 @@ package spotlight.spotlight_ver2.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -160,4 +163,17 @@ public class UserService {
     }
     // 위 문제 해결 후 return false 작성
 */
+
+    public User getUserById(long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            String username = authentication.getName();
+            return userRepository.findByUsername(username).orElse(null);
+        }
+        return null;
+    }
 }
