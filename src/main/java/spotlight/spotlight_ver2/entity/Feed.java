@@ -94,9 +94,8 @@ public class Feed {
         this.feedImages = feedImages;
     }
 
-    public void setThumbnailImage(String thiumbnailImage) {
-        this.thumbnailImage = thumbnailImage;
-    }
+    public void setThumbnailImage(String thumbnailImage) { this.thumbnailImage = thumbnailImage; }
+
 
     public String getContent() {
         return content;

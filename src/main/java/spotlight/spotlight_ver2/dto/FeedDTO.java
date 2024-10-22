@@ -1,5 +1,6 @@
 package spotlight.spotlight_ver2.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.sql.Timestamp;
@@ -17,7 +18,7 @@ public class FeedDTO {
     @Schema(description = "썸네일 이미지 URL", example = "http://example.com/thumbnail.jpg")
     private String thumbnailImage;
 
-    @Schema(description = "피드 이미지 URLemf", example = "[\"http://example.com/image1.jpg\", \"http://example.com/image2.jpg\"]")
+    @Schema(description = "피드 이미지 URL", example = "http://example.com/image1.jpg")
     private String feedImages;
 
     @Schema(description = "피드 내용", example = "This is the content of the feed.")
@@ -35,6 +36,7 @@ public class FeedDTO {
     @Schema(description = "카테고리", implementation = CategoryDTO.class)
     private CategoryDTO category;
 
+    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     @Schema(description = "생성 일자", example = "2024-09-06T12:00:00Z")
     private Timestamp createdDate;
 

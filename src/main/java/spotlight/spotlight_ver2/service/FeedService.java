@@ -40,6 +40,10 @@ public class FeedService {
     }
 
     public FeedDTO createFeed(FeedDTO feedDTO) {
+        if (feedDTO.getUser() == null || feedDTO.getUser().getId() == null) {
+            throw new BadRequestException("사용자 정보가 필요합니다.");
+        }
+
         User user = userRepository.findById(feedDTO.getUser().getId())
                 .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
@@ -92,6 +96,42 @@ public class FeedService {
     }
 
     private void validateFeed(Feed feed) {
+        if (isNullOrEmpty(feed.getTitle())) {
+            throw new BadRequestException("게시글 제목은 필수 입력 사항입니다.");
+        }
+
+        if (isNullOrEmpty(feed.getThumbnailImage())) {
+            throw new BadRequestException("이미지 URL은 필수 입력 사항입니다.");
+        }
+
+        if (!isValidUrl(feed.getThumbnailImage())) {
+            throw new BadRequestException("유효하지 않은 이미지 URL입니다. 올바른 URL을 입력하세요.");
+        }
+
+        if (isNullOrEmpty(feed.getContent())) {
+            throw new BadRequestException("내용은 필수 입력 사항입니다.");
+        }
+
+        if (feed.getCategory() == null) {
+            throw new BadRequestException("카테고리가 지정되지 않았습니다. 카테고리를 선택하세요.");
+        }
+
+        // 프로젝트 또는 전시 정보의 존재 확인
+        if (feed.getProject() == null && feed.getExhibition() == null) {
+            throw new BadRequestException("프로젝트 또는 전시 정보 중 하나는 필수입니다.");
+        }
+    }
+
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
+    private boolean isValidUrl(String url) {
+        return url != null && (url.startsWith("http://") || url.startsWith("https://"));
+    }
+
+    /*
+    private void validateFeed(Feed feed) {
         if (feed.getTitle() == null || feed.getTitle().isEmpty() ||
                 feed.getThumbnailImage() == null || feed.getThumbnailImage().isEmpty() ||
                 feed.getContent() == null || feed.getContent().isEmpty()) {
@@ -115,6 +155,8 @@ public class FeedService {
     private boolean isValidUrl(String url) {
         return url.startsWith("http://") || url.startsWith("https://");
     }
+
+     */
 
     public List<FeedDTO> searchFeedsByHashtag(String hashtag) {
         try {
