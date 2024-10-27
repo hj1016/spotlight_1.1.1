@@ -6,6 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
-public class CertificationRequest {
-    private MultipartFile certification;
+public class CertificateRequest {
+    private MultipartFile certificate;
 }

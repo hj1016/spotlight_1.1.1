@@ -21,8 +21,8 @@ public class Student {
     @Column(name = "pf_path")
     private String portfolioImage;
 
-    @Column
-    private String enrollmentCertification;
+    @Column(name = "student_certificate", nullable = true)
+    private String studentCertificate;
 
     @OneToOne
     @MapsId
@@ -63,9 +63,9 @@ public class Student {
         this.portfolioImage = portfolioImage;
     }
 
-    public String getEnrollmentCertification() { return enrollmentCertification; }
+    public String getStudentCertificate() { return studentCertificate; }
 
-    public void setEnrollmentCertification(String enrollmentCertification) { this.enrollmentCertification = enrollmentCertification; }
+    public void setStudentCertificate(String studentCertificate) { this.studentCertificate = studentCertificate; }
 
     public User getUser() {
         return user;

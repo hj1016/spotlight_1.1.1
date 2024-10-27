@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CertificationResponse {
+public class CertificateResponse {
     private boolean success;
-    private String certification;
+    private String certificate;
+    private String message;
 }

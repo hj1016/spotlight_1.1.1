@@ -13,5 +13,6 @@ public class UserRegistrationDTO {
     private String school;
     private String major;
     private String company;
-    private String certification;
+    private String studentCertification;
+    private String recruiterCertification;
 }

@@ -15,8 +15,8 @@ public class Recruiter {
     @Column(name = "company", nullable = false)
     private String company;
 
-    @Column(name = "certification", nullable = true)
-    private String certification;
+    @Column(name = "recruiter_certificate", nullable = true)
+    private String recruiterCertificate;
 
     public Long getUserId() {
         return userId;
@@ -42,11 +42,7 @@ public class Recruiter {
         this.company = company;
     }
 
-    public String getCertification() {
-        return certification;
-    }
+    public String getRecruiterCertificate() { return recruiterCertificate; }
 
-    public void setCertification(String certification) {
-        this.certification = certification;
-    }
+    public void setRecruiterCertificate(String recruiterCertificate) { this.recruiterCertificate = recruiterCertificate; }
 }

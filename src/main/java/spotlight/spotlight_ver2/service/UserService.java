@@ -18,8 +18,8 @@ import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.repository.RecruiterRepository;
 import spotlight.spotlight_ver2.repository.StudentRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
-import spotlight.spotlight_ver2.request.CertificationRequest;
-import spotlight.spotlight_ver2.response.CertificationResponse;
+import spotlight.spotlight_ver2.request.CertificateRequest;
+import spotlight.spotlight_ver2.response.CertificateResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -116,6 +116,7 @@ public class UserService {
                 student.setUser(resultUser);
                 student.setSchool(userRegistrationDTO.getSchool());
                 student.setMajor(userRegistrationDTO.getMajor());
+                student.setStudentCertificate(userRegistrationDTO.getStudentCertification());
                 try {
                     studentRepository.save(student);
                 } catch (Exception e) {
@@ -125,7 +126,7 @@ public class UserService {
                 Recruiter recruiter = new Recruiter();
                 recruiter.setUser(resultUser);
                 recruiter.setCompany(userRegistrationDTO.getCompany());
-                recruiter.setCertification(userRegistrationDTO.getCertification());
+                recruiter.setRecruiterCertificate(userRegistrationDTO.getRecruiterCertification());
                 try {
                     recruiterRepository.save(recruiter);
                 } catch (Exception e) {
@@ -139,30 +140,56 @@ public class UserService {
     }
 
     // 학생 재학증명서 업로드
-
-/*
-    // 리크루터 재직증명서 업로드
-    public CertificationResponse uploadCertification(User user, CertificationRequest certificationRequest) {
-        CertificationResponse certificationResponse = new CertificationResponse();
+    public CertificateResponse uploadStudentCertificate(User user, CertificateRequest certificateRequest) {
+        CertificateResponse certificateResponse = new CertificateResponse();
         String imageUrl;
-        MultipartFile certification = certificationRequest.getCertification();
+        MultipartFile certificate = certificateRequest.getCertificate();
+        Optional<Student> studentOptional = studentRepository.findById(user.getId());
+
+        if (certificate != null && !certificate.isEmpty() && studentOptional.isPresent()) {
+            try {
+                imageUrl = uploadImageService.uploadImage(certificate);
+                Student student = studentOptional.get();
+                student.setStudentCertificate(imageUrl);
+                studentRepository.save(student);
+                certificateResponse.setCertificate(imageUrl);
+                certificateResponse.setSuccess(true);
+            } catch (IOException e) {
+                throw new RuntimeException("학생 재학증명서 업로드에 실패했습니다.", e);
+            }
+        } else {
+            certificateResponse.setSuccess(false);
+            certificateResponse.setMessage("재학증명서가 유효하지 않거나 학생 정보가 없습니다.");  // setMessage 추가
+        }
+
+        return certificateResponse;
+    }
+
+    // 리크루터 재직증명서 업로드
+    public CertificateResponse uploadRecruiterCertificate(User user, CertificateRequest certificateRequest) {
+        CertificateResponse certificateResponse = new CertificateResponse();
+        String imageUrl;
+        MultipartFile certificate = certificateRequest.getCertificate();
         Optional<Recruiter> recruiterOptional = recruiterRepository.findById(user.getId());
 
-        if (certification != null && !certification.isEmpty() && recruiterOptional.isPresent()) {
+        if (certificate != null && !certificate.isEmpty() && recruiterOptional.isPresent()) {
             try {
-                imageUrl = uploadImageService.uploadImage(certification);
-                long id = user.getId();
-                String sql = "UPDATE recruiter set certification = ? where id = ?";
+                imageUrl = uploadImageService.uploadImage(certificate);
+                Recruiter recruiter = recruiterOptional.get();
+                recruiter.setRecruiterCertificate(imageUrl);
+                recruiterRepository.save(recruiter);
+                certificateResponse.setCertificate(imageUrl);
+                certificateResponse.setSuccess(true);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("리크루터 인증서 업로드에 실패했습니다.", e);
             }
+        } else {
+            certificateResponse.setSuccess(false);
+            certificateResponse.setMessage("인증서가 유효하지 않거나 리크루터 정보가 없습니다.");
         }
-        certificationResponse.setCertification(imageUrl);
-        certificationResponse.setSuccess(true);
-        return certificationResponse;
+
+        return certificateResponse;
     }
-    // 위 문제 해결 후 return false 작성
-*/
 
     public User getUserById(long id) {
         return userRepository.findById(id).orElse(null);
