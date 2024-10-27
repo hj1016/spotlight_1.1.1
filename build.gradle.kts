@@ -24,7 +24,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation ("mysql:mysql-connector-java:8.0.32")
     implementation("com.google.firebase:firebase-admin:9.2.0")
+    implementation ("io.jsonwebtoken:jjwt:0.9.1")
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
