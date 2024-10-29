@@ -1,9 +1,17 @@
 package spotlight.spotlight_ver2.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import spotlight.spotlight_ver2.entity.Feed;
+import spotlight.spotlight_ver2.entity.Hashtag;
+import spotlight.spotlight_ver2.entity.User;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
+@Getter
+@Setter
 @Schema(description = "해시태그 DTO")
 public class HashtagDTO {
 
@@ -16,50 +24,49 @@ public class HashtagDTO {
     @Schema(description = "생성 일자", example = "2024-09-06T12:00:00Z")
     private Timestamp createdDate;
 
-    @Schema(description = "사용자 정보", implementation = UserDTO.class)
-    private UserDTO user;
+    @Schema(description = "사용자 정보", implementation = HashtagUserDTO.class)
+    private HashtagUserDTO user;
 
-    // 기본 생성자
-    public HashtagDTO() {}
+    @Schema(description = "해시태그가 포함된 피드들")
+    private Set<HashtagFeedDTO> feeds;
 
-    // 매개변수를 받는 생성자
-    public HashtagDTO(Integer id, String hashtag, Timestamp createdDate, UserDTO user) {
-        this.id = id;
-        this.hashtag = hashtag;
-        this.createdDate = createdDate;
-        this.user = user;
+    public HashtagDTO(Hashtag hashtag) {
+        this.id = hashtag.getId();
+        this.hashtag = hashtag.getHashtag();
+        this.createdDate = hashtag.getCreatedDate();
+
+        // 사용자가 null이 아닐 경우에만 초기화
+        if (hashtag.getUser() != null) {
+            this.user = new HashtagUserDTO(hashtag.getUser());
+        }
     }
 
-    // Getters and Setters
-    public Integer getId() {
-        return id;
+    @Getter
+    @Setter
+    public static class HashtagUserDTO {
+        @Schema(description = "사용자 ID", example = "1")
+        private Long id;
+
+        @Schema(description = "사용자 이름", example = "김학생")
+        private String username;
+
+        public HashtagUserDTO(User user) {
+            this.id = user.getId();
+            this.username = user.getUsername();
+        }
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @Getter
+    public static class HashtagFeedDTO {
+        @Schema(description = "피드 ID", example = "1")
+        private Long feedId;
 
-    public String getHashtag() {
-        return hashtag;
-    }
+        @Schema(description = "피드 제목", example = "Feed Title")
+        private String title;
 
-    public void setHashtag(String hashtag) {
-        this.hashtag = hashtag;
-    }
-
-    public Timestamp getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Timestamp createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public UserDTO getUser() {
-        return user;
-    }
-
-    public void setUser(UserDTO user) {
-        this.user = user;
+        public HashtagFeedDTO(Feed feed) {
+            this.feedId = feed.getFeedId();
+            this.title = feed.getTitle();
+        }
     }
 }

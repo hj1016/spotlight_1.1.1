@@ -1,11 +1,17 @@
 package spotlight.spotlight_ver2.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import spotlight.spotlight_ver2.entity.*;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Getter
+@Setter
 @Schema(description = "피드 DTO")
 public class FeedDTO {
 
@@ -33,170 +39,162 @@ public class FeedDTO {
     @Schema(description = "리크루터 조회 수", example = "789")
     private Integer hitsRecruiter;
 
-    @Schema(description = "카테고리", implementation = CategoryDTO.class)
-    private CategoryDTO category;
-
-    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     @Schema(description = "생성 일자", example = "2024-09-06T12:00:00Z")
     private Timestamp createdDate;
 
     @Schema(description = "수정 일자", example = "2024-09-06T12:00:00Z")
     private Timestamp modifiedDate;
 
-    @Schema(description = "사용자 정보", implementation = UserDTO.class)
-    private UserDTO user;
+    @Schema(description = "카테고리", implementation = FeedCategoryDTO.class)
+    private FeedCategoryDTO category;
 
-    @Schema(description = "전시 정보", implementation = ExhibitionDTO.class)
-    private ExhibitionDTO exhibition;
+    @Schema(description = "사용자 정보", implementation = FeedUserDTO.class)
+    private FeedUserDTO user;
 
-    @Schema(description = "프로젝트 정보", implementation = ProjectDTO.class)
-    private ProjectDTO project;
+    @Schema(description = "전시 정보", implementation = FeedExhibitionDTO.class)
+    private FeedExhibitionDTO exhibition;
 
-    @Schema(description = "해시태그 집합", implementation = HashtagDTO.class)
-    private Set<HashtagDTO> hashtags;
+    @Schema(description = "프로젝트 정보", implementation = FeedProjectDTO.class)
+    private FeedProjectDTO project;
 
-    // 기본 생성자
+    @Schema(description = "해시태그 집합", implementation = FeedHashtagDTO.class)
+    private Set<FeedHashtagDTO> hashtags;
+
     public FeedDTO() {}
 
-    // 매개변수를 받는 생성자
-    public FeedDTO(Long feedId, String title, String thumbnailImage, String feedImages, String content, Integer scrap,
-                   Integer hitsUser, Integer hitsRecruiter, CategoryDTO category, Timestamp createdDate, Timestamp modifiedDate,
-                   UserDTO user, ExhibitionDTO exhibition, ProjectDTO project, Set<HashtagDTO> hashtags) {
-        this.feedId = feedId;
-        this.title = title;
-        this.thumbnailImage = thumbnailImage;
-        this.feedImages = feedImages;
-        this.content = content;
-        this.scrap = scrap;
-        this.hitsUser = hitsUser;
-        this.hitsRecruiter = hitsRecruiter;
-        this.category = category;
-        this.createdDate = createdDate;
-        this.modifiedDate = modifiedDate;
-        this.user = user;
-        this.exhibition = exhibition;
-        this.project = project;
-        this.hashtags = hashtags;
+    /* Feed -> FeedDTO */
+    public FeedDTO(Feed feed) {
+        this.feedId = feed.getFeedId();
+        this.title = feed.getTitle();
+        this.thumbnailImage = feed.getThumbnailImage();
+        this.feedImages = feed.getFeedImages();
+        this.content = feed.getContent();
+        this.scrap = feed.getScrap();
+        this.hitsUser = feed.getHitsUser();
+        this.hitsRecruiter = feed.getHitsRecruiter();
+        this.createdDate = feed.getCreatedDate();
+        this.modifiedDate = feed.getModifiedDate();
+
+        // 카테고리와 사용자 ID만 포함하는 방식
+        this.category = feed.getCategory() != null ? new FeedCategoryDTO(feed.getCategory()) : null;
+        this.user = feed.getUser() != null ? new FeedUserDTO(feed.getUser()) : null;
+        this.exhibition = feed.getExhibition() != null ? new FeedExhibitionDTO(feed.getExhibition()) : null;
+        this.project = feed.getProject() != null ? new FeedProjectDTO(feed.getProject()) : null;
+
+        // 해시태그 변환 로직
+        this.hashtags = feed.getHashtags().stream()
+                .map(FeedHashtagDTO::new)
+                .collect(Collectors.toSet());
     }
 
-    // Getters and Setters
-    public Long getFeedId() {
-        return feedId;
+    /* 참조할 CategoryDTO */
+    @Getter
+    @Setter
+    public static class FeedCategoryDTO {
+        @Schema(description = "카테고리 ID", example = "9")
+        private Long id;
+
+        @Schema(description = "카테고리 이름", example = "전기/전자")
+        private String name;
+
+        public FeedCategoryDTO() {}
+
+        public FeedCategoryDTO(Category category){
+            this.id = category.getId();
+            this.name = category.getName();
+        }
     }
 
-    public void setFeedId(Long feedId) {
-        this.feedId = feedId;
+    /* 참조할 UserDTO */
+    @Getter
+    @Setter
+    public static class FeedUserDTO {
+        @Schema(description = "사용자 ID", example = "1")
+        private Long id;
+
+        @Schema(description = "사용자 실명", example = "김학생")
+        private String name;
+
+        public FeedUserDTO() {}
+
+        public FeedUserDTO(User user){
+            this.id = user.getId();
+            this.name = user.getName();
+        }
     }
 
-    public String getTitle() {
-        return title;
+    /* 참조할 ExhibitionDTO */
+    @Getter
+    @Setter
+    public static class FeedExhibitionDTO {
+        @Schema(description = "전시 ID", example = "1")
+        private Long exhibitionId;
+
+        @Schema(description = "전시 위치", example = "서울여자대학교 조형예술관")
+        private String location;
+
+        @Schema(description = "전시 일정", example = "2024-08-15")
+        private String schedule;
+
+        @Schema(description = "전시 시간", example = "10:00 AM")
+        private String time;
+
+        @Schema(description = "사용자 ID", example = "123")
+        private Long userId;
+
+        @Schema(description = "피드 ID", example = "456")
+        private Long feedId;
+
+        public FeedExhibitionDTO() {}
+
+        public FeedExhibitionDTO(Exhibition exhibition){
+            this.exhibitionId = exhibition.getExhibitionId();
+            this.location = exhibition.getLocation();
+            this.schedule = exhibition.getSchedule();
+            this.time = exhibition.getTime();
+            this.userId = exhibition.getUser().getId();
+            this.feedId = exhibition.getFeed().getFeedId();
+        }
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    /* 참조할 ProjectDTO */
+    @Getter
+    @Setter
+    public static class FeedProjectDTO {
+        @Schema(description = "프로젝트 ID")
+        private Long id;
+
+        @Schema(description = "프로젝트 이름")
+        private String name;
+
+        @Schema(description = "팀원 역할 리스트", implementation = ProjectRoleDTO.class)
+        private List<ProjectRoleDTO> projectRoles;
+
+        public FeedProjectDTO() {}
+
+        public FeedProjectDTO(Project project){
+            this.id = project.getId();
+            this.name = project.getName();
+            // studentRoles 맵을 리스트로 변환하여 projectRoles에 저장
+            this.projectRoles = project.getProjectRoles().values().stream()
+                    .map(ProjectRoleDTO::new)
+                    .collect(Collectors.toList());
+        }
     }
 
-    public String getThumbnailImage() {
-        return thumbnailImage;
-    }
+    /* 참조할 HashtagDTO */
+    @Getter
+    @Setter
+    public static class FeedHashtagDTO {
+        @Schema(description = "해시태그 ID", example = "1")
+        private Integer id;
 
-    public void setThumbnailImage(String thumbnailImage) {
-        this.thumbnailImage = thumbnailImage;
-    }
+        @Schema(description = "해시태그 이름", example = "#design")
+        private String hashtag;
 
-    public String getFeedImages() {
-        return feedImages;
-    }
-
-    public void setFeedImages(String feedImages) {
-        this.feedImages = feedImages;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Integer getScrap() {
-        return scrap;
-    }
-
-    public void setScrap(Integer scrap) {
-        this.scrap = scrap;
-    }
-
-    public Integer getHitsUser() {
-        return hitsUser;
-    }
-
-    public void setHitsUser(Integer hitsUser) {
-        this.hitsUser = hitsUser;
-    }
-
-    public Integer getHitsRecruiter() {
-        return hitsRecruiter;
-    }
-
-    public void setHitsRecruiter(Integer hitsRecruiter) {
-        this.hitsRecruiter = hitsRecruiter;
-    }
-
-    public CategoryDTO getCategory() {
-        return category;
-    }
-
-    public void setCategory(CategoryDTO category) {
-        this.category = category;
-    }
-
-    public Timestamp getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(Timestamp createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Timestamp getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(Timestamp modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
-    public UserDTO getUser() {
-        return user;
-    }
-
-    public void setUser(UserDTO user) {
-        this.user = user;
-    }
-
-    public ExhibitionDTO getExhibition() {
-        return exhibition;
-    }
-
-    public void setExhibition(ExhibitionDTO exhibition) {
-        this.exhibition = exhibition;
-    }
-
-    public ProjectDTO getProject() {
-        return project;
-    }
-
-    public void setProject(ProjectDTO project) {
-        this.project = project;
-    }
-
-    public Set<HashtagDTO> getHashtags() {
-        return hashtags;
-    }
-
-    public void setHashtags(Set<HashtagDTO> hashtags) {
-        this.hashtags = hashtags;
+        public FeedHashtagDTO(Hashtag hashtag) {
+            this.id = hashtag.getId();
+            this.hashtag = hashtag.getHashtag();
+        }
     }
 }

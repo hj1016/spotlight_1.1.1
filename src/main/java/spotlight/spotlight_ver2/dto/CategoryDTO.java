@@ -1,10 +1,17 @@
 package spotlight.spotlight_ver2.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import spotlight.spotlight_ver2.entity.Category;
+import spotlight.spotlight_ver2.entity.Feed;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Getter
+@Setter
 @Schema(description = "카테고리 DTO")
 public class CategoryDTO {
 
@@ -14,53 +21,33 @@ public class CategoryDTO {
     @Schema(description = "카테고리 이름", example = "전기/전자")
     private String name;
 
-    @Schema(description = "부모 카테고리 이름", example = "공학")
-    private CategoryDTO parent;
+    @Schema(description = "부모 카테고리 ID", example = "1")
+    private Long parentId;
 
-    @Schema(description = "피드 정보", implementation = FeedDTO.class)
-    private Set<FeedDTO> feeds = new HashSet<>();
+    @Schema(description = "피드 정보", implementation = CategoryFeedDTO.class)
+    private Set<CategoryFeedDTO> feeds = new HashSet<>();
 
-    // 기본 생성자
-    public CategoryDTO() {}
+    public CategoryDTO(Category category) {
+        this.id = category.getId();
+        this.name = category.getName();
+        this.parentId = (category.getParent() != null) ? category.getParent().getId() : null;
 
-    // 매개변수를 받는 생성자
-    public CategoryDTO(Long id, String name, CategoryDTO parent, Set<FeedDTO> feeds) {
-        this.id = id;
-        this.name = name;
-        this.parent = parent;
-        this.feeds = feeds;
+        this.feeds = category.getFeeds().stream()
+                .map(CategoryFeedDTO::new)
+                .collect(Collectors.toSet());
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    @Getter
+    public static class CategoryFeedDTO {
+        @Schema(description = "피드 ID", example = "1")
+        private Long feedId;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+        @Schema(description = "피드 제목", example = "Feed Title")
+        private String title;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public CategoryDTO getParent() {
-        return parent;
-    }
-
-    public void setParent(CategoryDTO parent) {
-        this.parent = parent;
-    }
-
-    public Set<FeedDTO> getFeeds() {
-        return feeds;
-    }
-
-    public void setFeeds(Set<FeedDTO> feeds) {
-        this.feeds = feeds;
+        public CategoryFeedDTO(Feed feed) {
+            this.feedId = feed.getFeedId();
+            this.title = feed.getTitle();
+        }
     }
 }

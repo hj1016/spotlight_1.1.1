@@ -1,10 +1,17 @@
 package spotlight.spotlight_ver2.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import spotlight.spotlight_ver2.entity.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+@Getter
+@Setter
 @Schema(description = "학생 DTO")
 public class StudentDTO {
 
@@ -23,76 +30,115 @@ public class StudentDTO {
     @Schema(description = "재학 증명서 URL", example = "http://example.com/enrollment-cert.jpg")
     private String enrollmentCertification;
 
-    @Schema(description = "사용자 정보", implementation = UserDTO.class)
-    private UserDTO user;
+    @Schema(description = "사용자 정보", implementation = StudentUserDTO.class)
+    private StudentUserDTO user;
 
-    @Schema(description = "제안서 목록", implementation = ProposalDTO.class)
-    private List<ProposalDTO> proposals;
+    @Schema(description = "제안서 목록", implementation = StudentProposalDTO.class)
+    private List<StudentProposalDTO> proposals;
 
-    @Schema(description = "프로젝트 역할 목록", implementation = ProjectRoleDTO.class)
-    private Set<ProjectRoleDTO> projectRoles;
+    @Schema(description = "프로젝트 역할 목록", implementation = StudentProjectRoleDTO.class)
+    private Set<StudentProjectRoleDTO> projectRoles;
 
-    // 기본 생성자
-    public StudentDTO() {}
+    public StudentDTO(Student student) {
+        this.userId = student.getUserId();
+        this.school = student.getSchool();
+        this.major = student.getMajor();
+        this.portfolioImage = student.getPortfolioImage();
+        this.enrollmentCertification = student.getStudentCertificate();
 
-    // 매개변수를 받는 생성자
-    public StudentDTO(Long userId, String school, String major, String portfolioImage, String enrollmentCertification, UserDTO user, List<ProposalDTO> proposals, Set<ProjectRoleDTO> projectRoles) {
-        this.userId = userId;
-        this.school = school;
-        this.major = major;
-        this.portfolioImage = portfolioImage;
-        this.enrollmentCertification = enrollmentCertification;
-        this.user = user;
-        this.proposals = proposals;
-        this.projectRoles = projectRoles;
+        // 사용자 정보 초기화
+        this.user = (student.getUser() != null) ? new StudentUserDTO(student.getUser()) : null;
+
+        // 제안서 목록 초기화
+        this.proposals = (student.getProposals() != null) ? student.getProposals().stream()
+                .map(StudentProposalDTO::new)
+                .collect(Collectors.toList()) : List.of();
+
+        // 프로젝트 역할 목록 초기화
+        this.projectRoles = (student.getProjectRoles() != null) ? student.getProjectRoles().stream()
+                .map(StudentProjectRoleDTO::new)
+                .collect(Collectors.toSet()) : Set.of();
     }
 
-    // Getters and Setters
-    public Long getUserId() {
-        return userId;
+    @Getter
+    public static class StudentUserDTO {
+        @Schema(description = "사용자 ID", example = "1")
+        private Long id;
+
+        @Schema(description = "사용자 이름", example = "김학생")
+        private String username;
+
+        @Schema(description = "이메일 주소", example = "김학생@example.com")
+        private String email;
+
+        @Schema(description = "사용자 실명", example = "김학생")
+        private String name;
+        public StudentUserDTO(User user) {
+            this.id = user.getId();
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+            this.name = user.getName();
+        }
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    @Getter
+    public static class StudentProposalDTO {
+        @Schema(description = "제안서 ID", example = "1")
+        private Long proposalId;
+
+        @Schema(description = "제안서 직무", example = "Software Developer")
+        private String job;
+
+        @Schema(description = "연락처", example = "hisoka@example.com")
+        private String contact;
+
+        @Schema(description = "제안서 설명", example = "This is a proposal for a software development position.")
+        private String description;
+
+        @Schema(description = "제안서 생성 일자", example = "2024-09-06T12:00:00")
+        private LocalDateTime createdDate;
+
+        @Schema(description = "제안서 상태", example = "Pending")
+        private String status;
+
+        @Schema(description = "리크루터 정보", implementation = RecruiterDTO.class)
+        private RecruiterDTO recruiter;
+        public StudentProposalDTO(Proposal proposal) {
+            this.proposalId = proposal.getProposalId();
+            this.job = proposal.getJob();
+            this.contact = proposal.getContact();
+            this.description = proposal.getDescription();
+            this.createdDate = proposal.getCreatedDate();
+            this.status = proposal.getStatus();
+
+            // 리크루터 정보 초기화
+            this.recruiter = (proposal.getRecruiter() != null) ? new RecruiterDTO(proposal.getRecruiter()) : null;
+        }
     }
 
-    public String getSchool() {
-        return school;
-    }
+    @Getter
+    public static class StudentProjectRoleDTO {
+        @Schema(description = "프로젝트 역할 ID")
+        private Long id;
 
-    public void setSchool(String school) {
-        this.school = school;
-    }
+        @Schema(description = "학생 ID")
+        private Long userId;
 
-    public String getMajor() {
-        return major;
-    }
+        @Schema(description = "프로젝트 ID")
+        private Long projectId;
 
-    public void setMajor(String major) {
-        this.major = major;
-    }
+        @Schema(description = "역할")
+        private String role;
 
-    public String getPortfolioImage() { return portfolioImage; }
+        @Schema(description = "초대 수락 여부")
+        private boolean accepted;
 
-    public void setPortfolioImage(String portfolioImage) { this.portfolioImage = portfolioImage; }
-
-    public String getEnrollmentCertification() { return enrollmentCertification; }
-
-    public void setEnrollmentCertification(String enrollmentCertification) { this.enrollmentCertification = enrollmentCertification; }
-
-    public UserDTO getUser() { return user; }
-
-    public void setUser(UserDTO user) { this.user = user; }
-
-    public List<ProposalDTO> getProposals() { return proposals; }
-
-    public void setProposals(List<ProposalDTO> proposals) { this.proposals = proposals; }
-
-    public Set<ProjectRoleDTO> getProjectRoles() {
-        return projectRoles;
-    }
-
-    public void setProjectRoles(Set<ProjectRoleDTO> projectRoles) {
-        this.projectRoles = projectRoles;
+        public StudentProjectRoleDTO(ProjectRole projectRole) {
+            this.id = projectRole.getId();
+            this.userId = (projectRole.getStudent() != null) ? projectRole.getStudent().getUserId() : null;
+            this.projectId = (projectRole.getProject() != null) ? projectRole.getProject().getId() : null;
+            this.role = projectRole.getRole();
+            this.accepted = projectRole.isAccepted();
+        }
     }
 }

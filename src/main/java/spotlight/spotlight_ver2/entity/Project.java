@@ -26,7 +26,7 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @MapKey(name = "student")
     @Column(name = "role")
-    private Map<Student, ProjectRole> studentRoles = new HashMap<>();
+    private Map<Student, ProjectRole> projectRoles = new HashMap<>();
 
     public Long getId() {
         return id;
@@ -56,11 +56,11 @@ public class Project {
         this.feeds = feeds;
     }
 
-    public Map<Student, ProjectRole> getStudentRoles() {
-        return studentRoles;
+    public Map<Student, ProjectRole> getProjectRoles() {
+        return projectRoles;
     }
 
-    public void setStudentRoles(Map<Student, ProjectRole> studentRoles) {
-        this.studentRoles = studentRoles;
+    public void setProjectRoles(Map<Student, ProjectRole> projectRoles) {
+        this.projectRoles = projectRoles;
     }
 }

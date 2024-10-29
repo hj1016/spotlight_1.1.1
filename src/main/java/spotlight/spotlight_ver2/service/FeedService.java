@@ -204,7 +204,7 @@ public class FeedService {
         Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(() -> new NotFoundException("ID가 있는 피드를 찾을 수 없습니다: " + feedId));
 
-        return feed.getProject().getStudentRoles().values().stream()
+        return feed.getProject().getProjectRoles().values().stream()
                 .map(ProjectRole::getStudent)
                 .map(StudentMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());

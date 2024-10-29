@@ -52,5 +52,12 @@ public class Category {
     public void setParent(Category parent) {
         this.parent = parent;
     }
-}
 
+    public Set<Feed> getFeeds() {
+        return feeds;
+    }
+
+    public void setFeeds(Set<Feed> feeds) {
+        this.feeds = feeds;
+    }
+}

@@ -1,9 +1,19 @@
 package spotlight.spotlight_ver2.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import spotlight.spotlight_ver2.entity.Feed;
+import spotlight.spotlight_ver2.entity.Project;
+import spotlight.spotlight_ver2.entity.ProjectRole;
+import spotlight.spotlight_ver2.entity.User;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+@Getter
+@Setter
 @Schema(description = "프로젝트 정보 DTO")
 public class ProjectDTO {
 
@@ -14,52 +24,84 @@ public class ProjectDTO {
     private String name;
 
     @Schema(description = "프로젝트 생성자")
-    private UserDTO creator;
+    private ProjectUserDTO creator;
 
-    @Schema(description = "팀원 역할 리스트", implementation = ProjectRoleDTO.class)
-    private List<ProjectRoleDTO> projectRoles;
+    @Schema(description = "프로젝트와 관련된 피드들")
+    private Set<ProjectFeedDTO> feeds;
 
-    // 기본 생성자
-    public ProjectDTO() {}
+    @Schema(description = "팀원 역할 리스트", implementation = ProjectProjectRoleDTO.class)
+    private List<ProjectProjectRoleDTO> projectRoles;
 
-    // 매개변수를 받는 생성자
-    public ProjectDTO(Long id, String name, UserDTO creator, List<ProjectRoleDTO> projectRoles) {
-        this.id = id;
-        this.name = name;
-        this.creator = creator;
-        this.projectRoles = projectRoles;
+    public ProjectDTO(Project project) {
+        this.id = project.getId();
+        this.name = project.getName();
+
+        if (project.getCreator() != null) {
+            this.creator = new ProjectUserDTO(project.getCreator());
+        }
+
+        // projectRoles가 null이 아닌지 체크
+        this.projectRoles = (project.getProjectRoles() != null) ?
+                project.getProjectRoles().values().stream()
+                        .map(ProjectProjectRoleDTO::new)
+                        .collect(Collectors.toList()) :
+                List.of();
+
+        // feeds가 null이 아닌지 체크하여 초기화
+        this.feeds = (project.getFeeds() != null) ?
+                project.getFeeds().stream()
+                        .map(ProjectFeedDTO::new)
+                        .collect(Collectors.toSet()) :
+                Set.of();
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    @Getter
+    @Setter
+    public static class ProjectUserDTO {
+        @Schema(description = "사용자 ID", example = "1")
+        private Long id;
+
+        @Schema(description = "사용자 실명", example = "김학생")
+        private String name;
+
+        public ProjectUserDTO(User user){
+            this.id = user.getId();
+            this.name = user.getName();
+        }
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    @Getter
+    @Setter
+    public static class ProjectFeedDTO {
+        @Schema(description = "피드 ID")
+        private Long feedId;
+
+        @Schema(description = "피드 제목")
+        private String title;
+
+        public ProjectFeedDTO(Feed feed) {
+            this.feedId = feed.getFeedId();
+            this.title = feed.getTitle();
+        }
     }
 
-    public String getName() {
-        return name;
-    }
+    @Getter
+    @Setter
+    public static class ProjectProjectRoleDTO {  // static 추가
 
-    public void setName(String name) {
-        this.name = name;
-    }
+        @Schema(description = "프로젝트 역할 ID")
+        private Long id;
 
-    public UserDTO getCreator() {
-        return creator;
-    }
+        @Schema(description = "역할")
+        private String role;
 
-    public void setCreator(UserDTO creator) {
-        this.creator = creator;
-    }
+        @Schema(description = "초대 수락 여부")
+        private boolean accepted;
 
-    public List<ProjectRoleDTO> getProjectRoles() {
-        return projectRoles;
-    }
-
-    public void setProjectRoles(List<ProjectRoleDTO> projectRoles) {
-        this.projectRoles = projectRoles;
+        public ProjectProjectRoleDTO(ProjectRole projectRole) {
+            this.id = projectRole.getId();
+            this.role = projectRole.getRole();
+            this.accepted = projectRole.isAccepted();
+        }
     }
 }

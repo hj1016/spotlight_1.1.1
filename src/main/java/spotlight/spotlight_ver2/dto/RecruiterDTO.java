@@ -1,15 +1,18 @@
 package spotlight.spotlight_ver2.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import spotlight.spotlight_ver2.entity.Recruiter;
+import spotlight.spotlight_ver2.entity.User;
 
+@Getter
+@Setter
 @Schema(description = "리크루터 DTO")
 public class RecruiterDTO {
 
     @Schema(description = "사용자 ID", example = "1")
     private Long userId;
-
-    @Schema(description = "사용자 정보", implementation = UserDTO.class)
-    private UserDTO user;
 
     @Schema(description = "회사", example = "네이버")
     private String company;
@@ -17,47 +20,37 @@ public class RecruiterDTO {
     @Schema(description = "재직 증명서 URL", example = "http://example.com/certification.jpg")
     private String certification;
 
-    // 기본 생성자
-    public RecruiterDTO() {}
+    @Schema(description = "사용자 정보", implementation = RecruiterUserDTO.class)
+    private RecruiterUserDTO user;
 
-    // 매개변수를 받는 생성자
-    public RecruiterDTO(Long userId, UserDTO user, String company, String certification) {
-        this.userId = userId;
-        this.user = user;
-        this.company = company;
-        this.certification = certification;
+    public RecruiterDTO(Recruiter recruiter) {
+        this.userId = recruiter.getUserId();
+        this.company = recruiter.getCompany();
+        this.certification = recruiter.getRecruiterCertificate();
+
+        // User 객체가 null이 아닐 때만 RecruiterUserDTO 초기화
+        this.user = (recruiter.getUser() != null) ? new RecruiterUserDTO(recruiter.getUser()) : null;
     }
 
-    // Getters and Setters
-    public Long getUserId() {
-        return userId;
-    }
+    @Getter
+    public static class RecruiterUserDTO {
+        @Schema(description = "사용자 ID", example = "1")
+        private Long id;
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+        @Schema(description = "사용자 이름", example = "김학생")
+        private String username;
 
-    public UserDTO getUser() {
-        return user;
-    }
+        @Schema(description = "이메일 주소", example = "김학생@example.com")
+        private String email;
 
-    public void setUser(UserDTO user) {
-        this.user = user;
-    }
+        @Schema(description = "사용자 실명", example = "김학생")
+        private String name;
 
-    public String getCompany() {
-        return company;
-    }
-
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
-    public String getCertification() {
-        return certification;
-    }
-
-    public void setCertification(String certification) {
-        this.certification = certification;
+        public RecruiterUserDTO(User user){
+            this.id = user.getId();
+            this.username = user.getUsername();
+            this.email = user.getEmail();
+            this.name = user.getName();
+        }
     }
 }
