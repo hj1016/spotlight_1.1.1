@@ -34,6 +34,8 @@ dependencies {
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.4.Final")
     runtimeOnly("com.mysql:mysql-connector-j")
 
+    implementation("io.github.flashvayne:chatgpt-spring-boot-starter:1.0.4")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.h2database:h2")
