@@ -28,7 +28,7 @@ public class StudentDTO {
     private String portfolioImage;
 
     @Schema(description = "재학 증명서 URL", example = "http://example.com/enrollment-cert.jpg")
-    private String enrollmentCertification;
+    private String studentCertificate;
 
     @Schema(description = "사용자 정보", implementation = StudentUserDTO.class)
     private StudentUserDTO user;
@@ -44,7 +44,7 @@ public class StudentDTO {
         this.school = student.getSchool();
         this.major = student.getMajor();
         this.portfolioImage = student.getPortfolioImage();
-        this.enrollmentCertification = student.getStudentCertificate();
+        this.studentCertificate = student.getStudentCertificate();
 
         // 사용자 정보 초기화
         this.user = (student.getUser() != null) ? new StudentUserDTO(student.getUser()) : null;
