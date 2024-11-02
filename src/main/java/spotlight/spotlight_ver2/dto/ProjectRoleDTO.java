@@ -25,6 +25,8 @@ public class ProjectRoleDTO {
     @Schema(description = "초대 수락 여부")
     private boolean accepted;
 
+    public ProjectRoleDTO() {}
+
     public ProjectRoleDTO(ProjectRole projectRole) {
         this.id = projectRole.getId();
         this.userId = (projectRole.getStudent() != null) ? projectRole.getStudent().getUserId() : null;

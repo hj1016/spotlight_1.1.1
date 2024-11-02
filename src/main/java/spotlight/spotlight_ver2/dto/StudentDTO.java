@@ -39,6 +39,8 @@ public class StudentDTO {
     @Schema(description = "프로젝트 역할 목록", implementation = StudentProjectRoleDTO.class)
     private Set<StudentProjectRoleDTO> projectRoles;
 
+    public StudentDTO() {}
+
     public StudentDTO(Student student) {
         this.userId = student.getUserId();
         this.school = student.getSchool();
@@ -73,6 +75,9 @@ public class StudentDTO {
 
         @Schema(description = "사용자 실명", example = "김학생")
         private String name;
+
+        public StudentUserDTO() {}
+
         public StudentUserDTO(User user) {
             this.id = user.getId();
             this.username = user.getUsername();
@@ -103,6 +108,9 @@ public class StudentDTO {
 
         @Schema(description = "리크루터 정보", implementation = RecruiterDTO.class)
         private RecruiterDTO recruiter;
+
+        public StudentProposalDTO() {}
+
         public StudentProposalDTO(Proposal proposal) {
             this.proposalId = proposal.getProposalId();
             this.job = proposal.getJob();
@@ -132,6 +140,8 @@ public class StudentDTO {
 
         @Schema(description = "초대 수락 여부")
         private boolean accepted;
+
+        public StudentProjectRoleDTO() {}
 
         public StudentProjectRoleDTO(ProjectRole projectRole) {
             this.id = projectRole.getId();

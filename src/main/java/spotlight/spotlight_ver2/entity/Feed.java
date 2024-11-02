@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -21,7 +22,7 @@ public class Feed {
     private String thumbnailImage;
 
     @Column(name = "feed_images")
-    private String feedImages;
+    private List<String> feedImages;
 
     @Column(name = "content")
     private String content;
@@ -86,11 +87,11 @@ public class Feed {
         return thumbnailImage;
     }
 
-    public String getFeedImages() {
+    public List<String> getFeedImages() {
         return feedImages;
     }
 
-    public void setFeedImages(String feedImages) {
+    public void setFeedImages(List<String> feedImages) {
         this.feedImages = feedImages;
     }
 

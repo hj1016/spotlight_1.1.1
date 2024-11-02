@@ -88,6 +88,8 @@ public class UserDTO {
         @Schema(description = "전공", example = "소프트웨어융합학과")
         private String major;
 
+        public UserStudentDTO() {}
+
         public UserStudentDTO(Student student) {
             this.school = student.getSchool();
             this.major = student.getMajor();
@@ -103,6 +105,8 @@ public class UserDTO {
         @Schema(description = "재직 증명서 URL", example = "http://example.com/certification.jpg")
         private String certification;
 
+        public UserRecruiterDTO() {}
+
         public UserRecruiterDTO(Recruiter recruiter) {
             this.company = recruiter.getCompany();
             this.certification = recruiter.getRecruiterCertificate();
@@ -113,10 +117,12 @@ public class UserDTO {
     @Getter
     public static class UserHashtagDTO {
         @Schema(description = "해시태그 ID", example = "1")
-        private Integer id;
+        private Long id;
 
         @Schema(description = "해시태그 이름", example = "#design")
         private String hashtag;
+
+        public UserHashtagDTO() {}
 
         public UserHashtagDTO(Hashtag hashtag) {
             this.id = hashtag.getId();
@@ -132,6 +138,8 @@ public class UserDTO {
 
         @Schema(description = "피드 제목", example = "Feed Title")
         private String title;
+
+        public UserFeedDTO() {}
 
         public UserFeedDTO(Feed feed) {
             this.feedId = feed.getFeedId();
@@ -154,6 +162,8 @@ public class UserDTO {
 
         @Schema(description = "스크랩된 사용자 이름", example = "김학생")
         private String scrappedUserName;
+
+        public UserScrapDTO() {}
 
         public UserScrapDTO(Scrap scrap) {
             this.scrapId = scrap.getScrapId();

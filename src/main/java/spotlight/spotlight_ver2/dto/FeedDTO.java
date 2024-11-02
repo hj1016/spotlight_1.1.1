@@ -24,8 +24,8 @@ public class FeedDTO {
     @Schema(description = "썸네일 이미지 URL", example = "http://example.com/thumbnail.jpg")
     private String thumbnailImage;
 
-    @Schema(description = "피드 이미지 URL", example = "http://example.com/image1.jpg")
-    private String feedImages;
+    @Schema(description = "피드 이미지 URL 목록", example = "[\"http://example.com/image1.jpg\", \"http://example.com/image2.jpg\"]")
+    private List<String> feedImages;  // String -> List<String>
 
     @Schema(description = "피드 내용", example = "This is the content of the feed.")
     private String content;
@@ -187,10 +187,12 @@ public class FeedDTO {
     @Setter
     public static class FeedHashtagDTO {
         @Schema(description = "해시태그 ID", example = "1")
-        private Integer id;
+        private Long id;
 
         @Schema(description = "해시태그 이름", example = "#design")
         private String hashtag;
+
+        public FeedHashtagDTO() {}
 
         public FeedHashtagDTO(Hashtag hashtag) {
             this.id = hashtag.getId();

@@ -28,6 +28,8 @@ public class ScrapDTO {
     @Schema(description = "스크랩된 인재 정보", implementation = ScrappedUserDTO.class)
     private ScrappedUserDTO scrappedUser;
 
+    public ScrapDTO() {}
+
     public ScrapDTO(Scrap scrap) {
         this.scrapId = scrap.getScrapId();
         this.user = (scrap.getUser() != null) ? new ScrapUserDTO(scrap.getUser()) : null;
@@ -64,6 +66,8 @@ public class ScrapDTO {
         @Schema(description = "사용자 실명", example = "김학생")
         private String name;
 
+        public UserBaseDTO() {}
+
         public UserBaseDTO(User user) {
             this.id = user.getId();
             this.username = user.getUsername();
@@ -86,6 +90,8 @@ public class ScrapDTO {
         @Schema(description = "피드 내용", example = "이것은 프로젝트 제안입니다.")
         private String content;
 
+        public ScrapFeedDTO() {}
+
         public ScrapFeedDTO(Feed feed) {
             this.id = feed.getFeedId();
             this.title = feed.getTitle();
@@ -98,6 +104,8 @@ public class ScrapDTO {
     public static class ScrapStageDTO {
         @Schema(description = "스테이지 ID", example = "1")
         private Long id;
+
+        public ScrapStageDTO() {}
 
         public ScrapStageDTO(Stage stage) {
             this.id = stage.getId();

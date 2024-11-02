@@ -16,7 +16,7 @@ import java.util.Set;
 public class HashtagDTO {
 
     @Schema(description = "해시태그 ID", example = "1")
-    private Integer id;
+    private Long id;
 
     @Schema(description = "해시태그 이름", example = "#design")
     private String hashtag;
@@ -29,6 +29,8 @@ public class HashtagDTO {
 
     @Schema(description = "해시태그가 포함된 피드들")
     private Set<HashtagFeedDTO> feeds;
+
+    public HashtagDTO() {}
 
     public HashtagDTO(Hashtag hashtag) {
         this.id = hashtag.getId();
@@ -50,6 +52,8 @@ public class HashtagDTO {
         @Schema(description = "사용자 이름", example = "김학생")
         private String username;
 
+        public HashtagUserDTO() {}
+
         public HashtagUserDTO(User user) {
             this.id = user.getId();
             this.username = user.getUsername();
@@ -63,6 +67,8 @@ public class HashtagDTO {
 
         @Schema(description = "피드 제목", example = "Feed Title")
         private String title;
+
+        public HashtagFeedDTO() {}
 
         public HashtagFeedDTO(Feed feed) {
             this.feedId = feed.getFeedId();

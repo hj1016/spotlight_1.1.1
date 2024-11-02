@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "app_user") // h2의 예약어 문제를 피하기 위함.
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

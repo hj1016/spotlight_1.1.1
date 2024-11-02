@@ -11,7 +11,7 @@ public class Hashtag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hashtag_id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "hashtag")
     private String hashtag;
@@ -26,11 +26,11 @@ public class Hashtag {
     @ManyToMany(mappedBy = "hashtags")
     private Set<Feed> feeds = new HashSet<>();
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

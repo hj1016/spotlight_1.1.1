@@ -23,6 +23,8 @@ public class RecruiterDTO {
     @Schema(description = "사용자 정보", implementation = RecruiterUserDTO.class)
     private RecruiterUserDTO user;
 
+    public RecruiterDTO() {}
+
     public RecruiterDTO(Recruiter recruiter) {
         this.userId = recruiter.getUserId();
         this.company = recruiter.getCompany();
@@ -45,6 +47,8 @@ public class RecruiterDTO {
 
         @Schema(description = "사용자 실명", example = "김학생")
         private String name;
+
+        public RecruiterUserDTO() {}
 
         public RecruiterUserDTO(User user){
             this.id = user.getId();

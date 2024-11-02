@@ -32,6 +32,8 @@ public class ProjectDTO {
     @Schema(description = "팀원 역할 리스트", implementation = ProjectProjectRoleDTO.class)
     private List<ProjectProjectRoleDTO> projectRoles;
 
+    public ProjectDTO() {}
+
     public ProjectDTO(Project project) {
         this.id = project.getId();
         this.name = project.getName();
@@ -64,6 +66,8 @@ public class ProjectDTO {
         @Schema(description = "사용자 실명", example = "김학생")
         private String name;
 
+        public ProjectUserDTO() {}
+
         public ProjectUserDTO(User user){
             this.id = user.getId();
             this.name = user.getName();
@@ -78,6 +82,8 @@ public class ProjectDTO {
 
         @Schema(description = "피드 제목")
         private String title;
+
+        public ProjectFeedDTO() {}
 
         public ProjectFeedDTO(Feed feed) {
             this.feedId = feed.getFeedId();
@@ -97,6 +103,8 @@ public class ProjectDTO {
 
         @Schema(description = "초대 수락 여부")
         private boolean accepted;
+
+        public ProjectProjectRoleDTO() {}
 
         public ProjectProjectRoleDTO(ProjectRole projectRole) {
             this.id = projectRole.getId();

@@ -44,6 +44,8 @@ public class ExhibitionDTO {
         @Schema(description = "사용자 ID", example = "123")
         private Long id;
 
+        public ExhibitionUserDTO() {}
+
         public ExhibitionUserDTO(Long id) {
             this.id = id;
         }
@@ -56,6 +58,8 @@ public class ExhibitionDTO {
 
         @Schema(description = "피드 제목", example = "Feed Title")
         private String title;
+
+        public ExhibitionFeedDTO() {}
 
         public ExhibitionFeedDTO(Long feedId, String title) {
             this.feedId = feedId;

@@ -27,6 +27,8 @@ public class CategoryDTO {
     @Schema(description = "피드 정보", implementation = CategoryFeedDTO.class)
     private Set<CategoryFeedDTO> feeds = new HashSet<>();
 
+    public CategoryDTO() {}
+
     public CategoryDTO(Category category) {
         this.id = category.getId();
         this.name = category.getName();
@@ -44,6 +46,8 @@ public class CategoryDTO {
 
         @Schema(description = "피드 제목", example = "Feed Title")
         private String title;
+
+        public CategoryFeedDTO() {}
 
         public CategoryFeedDTO(Feed feed) {
             this.feedId = feed.getFeedId();
