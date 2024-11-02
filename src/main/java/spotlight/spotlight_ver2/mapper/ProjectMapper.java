@@ -22,7 +22,7 @@ public interface ProjectMapper {
     @Mapping(target = "creator", source = "creator", qualifiedByName = "mapUserToCreator")
     @Mapping(target = "projectRoles", source = "projectRoles", qualifiedByName = "mapProjectRolesToDTOs")
     @Mapping(target = "feeds", ignore = true)
-    @Mapping(target = "project", ignore = true)
+    @Mapping(source = "project.name", target = "name")
     ProjectDTO toDTO(Project project);
 
     // ProjectDTO -> Project 매핑

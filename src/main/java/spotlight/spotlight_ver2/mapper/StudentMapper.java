@@ -22,7 +22,6 @@ public interface StudentMapper {
     @Mapping(target = "user", source = "user", qualifiedByName = "mapUserToStudentUserDTO")
     @Mapping(target = "proposals", source = "proposals", qualifiedByName = "mapProposalsToDTOs")
     @Mapping(target = "projectRoles", source = "projectRoles", qualifiedByName = "mapProjectRolesToDTOs")
-    @Mapping(target = "student", ignore = true)
     StudentDTO toDTO(Student student);
 
     @Mapping(target = "user", source = "user", qualifiedByName = "mapStudentUserDTOToUser")

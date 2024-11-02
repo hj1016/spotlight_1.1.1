@@ -160,23 +160,25 @@ public class FeedService {
 
     public List<FeedDTO> searchFeedsByHashtag(String hashtag) {
         try {
-            // 해시태그를 검색
+            // 해시태그 검색
             Optional<Hashtag> hashtagOpt = hashtagRepository.findByHashtag(hashtag);
             if (hashtagOpt.isEmpty()) {
                 throw new NotFoundException("해시태그를 찾을 수 없습니다: " + hashtag);
             }
             Hashtag hashtagEntity = hashtagOpt.get();
 
-            // 검색 기록에 해시태그를 추가
+            // 검색 기록에 해시태그 추가
             searchHistoryService.addSearchHistory(hashtag);
 
-            // 해시태그 ID를 통해 피드를 검색
+            // 해시태그 ID를 통해 피드 검색
             List<Feed> feeds = feedRepository.findByHashtagsId(hashtagEntity.getId());
 
             // 검색된 피드를 DTO로 변환하여 반환
             return feeds.stream()
                     .map(feedMapper::toDTO)
                     .collect(Collectors.toList());
+        } catch (NotFoundException e) {
+            throw e;  // NotFoundException은 그대로 전달하여 404 응답 반환
         } catch (Exception e) {
             throw new SearchHistoryException("피드를 검색하는 동안 오류가 발생했습니다: " + e.getMessage());
         }
@@ -200,10 +202,11 @@ public class FeedService {
         return feedDTO;
     }
 
-    public List<StudentDTO> getProjectTeamMembers(Long feedId) {
+    public List<StudentDTO> getProjectTeamMembers(Long feedId, User user) {
         Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(() -> new NotFoundException("ID가 있는 피드를 찾을 수 없습니다: " + feedId));
 
+        // feed의 팀원 목록을 가져와 StudentDTO로 변환
         return feed.getProject().getProjectRoles().values().stream()
                 .map(ProjectRole::getStudent)
                 .map(StudentMapper.INSTANCE::toDTO)

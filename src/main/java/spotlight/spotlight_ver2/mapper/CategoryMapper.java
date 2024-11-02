@@ -14,7 +14,6 @@ public interface CategoryMapper {
     @Mapping(target = "parentId", source = "parent.id")
     @Mapping(target = "name", source = "name")
     @Mapping(target = "feeds", ignore = true)
-    @Mapping(target = "category", ignore = true)
     CategoryDTO toDTO(Category category);
 
     // CategoryDTO -> Category

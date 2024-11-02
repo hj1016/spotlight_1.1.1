@@ -40,6 +40,7 @@ public class ExhibitionDTO {
     }
 
     @Getter
+    @Setter
     public static class ExhibitionUserDTO {
         @Schema(description = "사용자 ID", example = "123")
         private Long id;

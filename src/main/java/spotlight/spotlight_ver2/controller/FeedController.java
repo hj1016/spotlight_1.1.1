@@ -15,9 +15,11 @@ import spotlight.spotlight_ver2.dto.FeedDTO;
 import spotlight.spotlight_ver2.dto.StudentDTO;
 import spotlight.spotlight_ver2.entity.Stage;
 import spotlight.spotlight_ver2.entity.User;
+import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.*;
 import spotlight.spotlight_ver2.repository.UserRepository;
 import spotlight.spotlight_ver2.response.ErrorResponse;
+import spotlight.spotlight_ver2.security.CustomUserDetails;
 import spotlight.spotlight_ver2.service.FeedService;
 import spotlight.spotlight_ver2.service.ScrapService;
 import spotlight.spotlight_ver2.service.SearchHistoryService;
@@ -55,6 +57,7 @@ public class FeedController {
             @ApiResponse(responseCode = "201", description = "피드 생성 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping
@@ -66,6 +69,8 @@ public class FeedController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (InternalServerErrorException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
@@ -128,12 +133,16 @@ public class FeedController {
     @DeleteMapping("/{feedId}")
     public ResponseEntity<?> deleteFeed(@PathVariable Long feedId) {
         try {
-            // 현재 인증된 사용자 가져오기
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = (User) authentication.getPrincipal();
+            // 현재 인증된 사용자의 username 가져오기
+            Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
+            String username = currentUser.getName();
+
+            // username으로 User 엔티티 조회
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
             // 피드 삭제 시 사용자 권한 검증
-            feedService.deleteFeed(feedId, currentUser);
+            feedService.deleteFeed(feedId, user);
 
             return ResponseEntity.status(HttpStatus.OK).body("게시글이 삭제되었습니다.");
         } catch (NotFoundException e) {
@@ -208,11 +217,13 @@ public class FeedController {
     public ResponseEntity<?> incrementFeedHits(
             @PathVariable @Parameter(description = "피드 ID") Long feedId) {
         try {
-            // 현재 인증된 사용자 가져오기
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = (User) authentication.getPrincipal();
+            Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
+            String username = currentUser.getName();
 
-            FeedDTO feedDTO = feedService.incrementHits(feedId, currentUser);
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+            FeedDTO feedDTO = feedService.incrementHits(feedId, user);
             return ResponseEntity.ok(feedDTO);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -235,13 +246,17 @@ public class FeedController {
             @RequestParam Long scrappedUserId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = (User) authentication.getPrincipal();
+            String username = authentication.getName();
 
-            Stage stage = new Stage(); // stageId를 바탕으로 Stage 객체를 조회하는 로직을 추가해야 함
-            stage.setId(stageId); // 간단하게 id 설정으로 처리
+            User currentUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
 
             User scrappedUser = userRepository.findById(scrappedUserId)
-                    .orElseThrow(() -> new NotFoundException("스크랩된 사용자를 찾을 수 없습니다."));
+                    .orElseThrow(() -> new NotFoundException("스크랩할 사용자를 찾을 수 없습니다."));
+
+            // Stage 객체 생성 및 ID 설정
+            Stage stage = new Stage();
+            stage.setId(stageId);
 
             Map<String, Object> response = scrapService.scrapFeed(feedId, currentUser, stage, scrappedUser);
             return ResponseEntity.ok(response);
@@ -267,7 +282,10 @@ public class FeedController {
     public ResponseEntity<?> unscrapFeed(@PathVariable Long feedId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = (User) authentication.getPrincipal();
+            String username = authentication.getName();
+
+            User currentUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
 
             Map<String, Object> response = scrapService.unscrapFeed(feedId, currentUser);
             return ResponseEntity.ok(response);
@@ -291,10 +309,14 @@ public class FeedController {
     @GetMapping("/{feedId}/team-members")
     public ResponseEntity<?> getProjectTeamMembers(@PathVariable Long feedId) {
         try {
-            // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            // User currentUser = (User) authentication.getPrincipal();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
 
-            List<StudentDTO> teamMembers = feedService.getProjectTeamMembers(feedId);
+            User currentUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
+
+            // 팀원 조회
+            List<StudentDTO> teamMembers = feedService.getProjectTeamMembers(feedId, currentUser);
             return ResponseEntity.ok(teamMembers);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -315,7 +337,15 @@ public class FeedController {
     public ResponseEntity<?> scrapStudent(@PathVariable Long feedId, @PathVariable Long studentId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = (User) authentication.getPrincipal();
+            String username = authentication.getName();
+
+            User currentUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
+
+            // 사용자 역할이 RECRUITER인지 확인
+            if (currentUser.getRole() != Role.RECRUITER) {
+                throw new UnauthorizedException("스크랩 기능은 RECRUITER 역할을 가진 사용자만 사용할 수 있습니다.");
+            }
 
             // Feed 존재 여부 체크
             if (!feedService.existsById(feedId)) {
@@ -349,7 +379,15 @@ public class FeedController {
     public ResponseEntity<?> unsrapStudent(@PathVariable Long feedId, @PathVariable Long studentId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User currentUser = (User) authentication.getPrincipal();
+            String username = authentication.getName();
+
+            User currentUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
+
+            // 사용자 역할이 RECRUITER인지 확인
+            if (currentUser.getRole() != Role.RECRUITER) {
+                throw new UnauthorizedException("스크랩 취소 기능은 RECRUITER 역할을 가진 사용자만 사용할 수 있습니다.");
+            }
 
             // Feed 존재 여부 체크
             if (!feedService.existsById(feedId)) {
