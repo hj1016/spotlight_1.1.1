@@ -1,73 +1,114 @@
 package spotlight.spotlight_ver2.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.*;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import spotlight.spotlight_ver2.dto.SchoolMajorDTO;
 import spotlight.spotlight_ver2.exception.ApiException;
 import spotlight.spotlight_ver2.response.MajorApiResponse;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class SearchSchoolMajorRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchSchoolMajorRepository.class);
     private final RestTemplate restTemplate;
+    private final String careerNetApiKey;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public SearchSchoolMajorRepository(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+        Dotenv dotenv = Dotenv.configure().load();
+        this.careerNetApiKey = dotenv.get("API_KEY_CAREER");
     }
 
     // 공통 API 호출 메서드
-    private MajorApiResponse callApi(String apiKey, String query) {
-        String apiUrl = "https://www.career.go.kr/cnet/front/openapi/openApiMajorCenter.do?key=" + apiKey + "&major=" + query;
+    private MajorApiResponse callApi(String schoolQuery, String majorQuery) {
+        String encodedSchoolQuery = "";
+        String encodedMajorQuery = "";
+        try {
+            if (schoolQuery != null) {
+                encodedSchoolQuery = URLEncoder.encode(schoolQuery, StandardCharsets.UTF_8.toString());
+            }
+            if (majorQuery != null) {
+                encodedMajorQuery = URLEncoder.encode(majorQuery, StandardCharsets.UTF_8.toString());
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new ApiException("파라미터 인코딩 중 오류 발생", e);
+        }
+
+        // 최종 API URL 구성
+        String apiUrl = "https://www.career.go.kr/cnet/openapi/getOpenApi.json" +
+                "?apiKey=" + careerNetApiKey +
+                "&svcType=api" +
+                "&svcCode=MAJOR" +
+                "&contentType=json" +
+                "&gubun=univ_list" +
+                "&univSe=univ" +
+                (encodedSchoolQuery.isEmpty() ? "" : "&school=" + encodedSchoolQuery) +
+                (encodedMajorQuery.isEmpty() ? "" : "&major=" + encodedMajorQuery);
+
+        logger.info("Encoded API URL: {}", apiUrl);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept-Charset", "UTF-8");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            logger.info("API 호출 시작: URL = {}", apiUrl);  // API 호출 시작 로깅
-            MajorApiResponse response = restTemplate.getForObject(apiUrl, MajorApiResponse.class);
-            logApiResponse(response);  // 응답 데이터 로깅
-            if (response == null || response.getMajorList() == null) {
-                throw new ApiException("API로부터 유효한 데이터를 받지 못했습니다.");
-            }
-            return response;
+            logger.info("API 호출 시작: URL = {}", apiUrl);
+
+            // API 응답을 String으로 받아 UTF-8로 강제 변환
+            ResponseEntity<byte[]> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, byte[].class);
+            String jsonResponse = new String(response.getBody(), StandardCharsets.UTF_8);
+            logger.info("UTF-8로 변환된 API 응답 내용: {}", jsonResponse);
+
+            // JSON 문자열을 MajorApiResponse 객체로 변환
+            return objectMapper.readValue(jsonResponse, MajorApiResponse.class);
+
+        } catch (HttpClientErrorException e) {
+            logger.error("API 호출 중 오류 발생: {}", e.getMessage());
+            throw new ApiException("API 호출 실패: " + e.getMessage());
         } catch (Exception e) {
-            logger.error("API 호출 중 오류 발생: {}", e.getMessage());  // 오류 발생 시 에러 로깅
+            logger.error("API 호출 중 예기치 않은 오류 발생: {}", e.getMessage());
             throw new ApiException("예기치 않은 오류가 발생했습니다: " + e.getMessage());
         }
     }
 
-    // API 응답 데이터 로깅 메서드
-    private void logApiResponse(MajorApiResponse response) {
-        if (response != null && response.getMajorList() != null) {
-            logger.info("API 응답 데이터 수신: 총 {}개의 학과 데이터", response.getMajorList().size());
-            // 학과 데이터 일부만 출력 (처음 3개의 데이터만)
-            response.getMajorList().stream()
-                    .limit(3)
-                    .forEach(dto -> logger.info("학교: {}, 학과: {}", dto.getSchoolName(), dto.getMajorName()));
-        } else {
-            logger.warn("API 응답 데이터가 없습니다.");  // 응답 데이터가 없을 경우 경고 로그
-        }
-    }
-
     // 학과 검색
-    public List<SchoolMajorDTO> searchMajors(String apiKey, String majorQuery) {
-        MajorApiResponse response = callApi(apiKey, majorQuery);
+    public List<SchoolMajorDTO> searchMajors(String majorQuery) {
+        MajorApiResponse response = callApi(null, majorQuery);
         return response.getMajorList();
     }
 
     // 학교 검색
-    public List<SchoolMajorDTO> searchSchools(String apiKey, String schoolQuery) {
-        MajorApiResponse response = callApi(apiKey, schoolQuery);
+    public List<SchoolMajorDTO> searchSchools(String schoolQuery) {
+        MajorApiResponse response = callApi(schoolQuery, null);
         return response.getMajorList();
     }
 
     // 학교와 학과로 검색
-    public List<SchoolMajorDTO> searchBySchoolAndMajor(String apiKey, String schoolQuery, String majorQuery) {
-        MajorApiResponse response = callApi(apiKey, majorQuery);
-        return response.getMajorList().stream()
-                .filter(major -> major.getSchoolName().equalsIgnoreCase(schoolQuery))
-                .toList();
+    public List<SchoolMajorDTO> searchBySchoolAndMajor(String schoolQuery, String majorQuery) {
+        // 각 쿼리를 개별적으로 호출
+        List<SchoolMajorDTO> schoolResults = searchSchools(schoolQuery);
+        List<SchoolMajorDTO> majorResults = searchMajors(majorQuery);
+
+        // 학교와 학과가 모두 일치하는 항목만 필터링
+        return schoolResults.stream()
+                .filter(school -> majorResults.stream()
+                        .anyMatch(major -> major.getSchoolName() != null
+                                && school.getSchoolName() != null
+                                && major.getSchoolName().equals(school.getSchoolName())
+                                && major.getMajorName().equalsIgnoreCase(majorQuery)))
+                .collect(Collectors.toList());
     }
 }

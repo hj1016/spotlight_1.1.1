@@ -18,8 +18,8 @@ public class SearchSchoolMajorService {
     }
 
     // 학교 이름으로 검색
-    public List<SchoolMajorDTO> searchSchools(String apiKey, String schoolQuery) {
-        List<SchoolMajorDTO> results = searchSchoolMajorRepository.searchSchools(apiKey, schoolQuery);
+    public List<SchoolMajorDTO> searchSchools(String schoolQuery) {
+        List<SchoolMajorDTO> results = searchSchoolMajorRepository.searchSchools(schoolQuery);
         if (results.isEmpty()) {
             throw new NotFoundException("해당 학교에 대한 검색 결과가 없습니다.");
         }
@@ -27,8 +27,8 @@ public class SearchSchoolMajorService {
     }
 
     // 학과 이름으로 검색
-    public List<SchoolMajorDTO> searchMajors(String apiKey, String majorQuery) {
-        List<SchoolMajorDTO> results = searchSchoolMajorRepository.searchMajors(apiKey, majorQuery);
+    public List<SchoolMajorDTO> searchMajors(String majorQuery) {
+        List<SchoolMajorDTO> results = searchSchoolMajorRepository.searchMajors(majorQuery);
         if (results.isEmpty()) {
             throw new NotFoundException("해당 학과에 대한 검색 결과가 없습니다.");
         }
@@ -36,8 +36,8 @@ public class SearchSchoolMajorService {
     }
 
     // 학교와 학과로 검색
-    public List<SchoolMajorDTO> searchBySchoolAndMajor(String apiKey, String schoolQuery, String majorQuery) {
-        List<SchoolMajorDTO> results = searchSchoolMajorRepository.searchBySchoolAndMajor(apiKey, schoolQuery, majorQuery);
+    public List<SchoolMajorDTO> searchBySchoolAndMajor(String schoolQuery, String majorQuery) {
+        List<SchoolMajorDTO> results = searchSchoolMajorRepository.searchBySchoolAndMajor(schoolQuery, majorQuery);
         if (results.isEmpty()) {
             throw new NotFoundException("해당 학교와 학과에 대한 검색 결과가 없습니다.");
         }

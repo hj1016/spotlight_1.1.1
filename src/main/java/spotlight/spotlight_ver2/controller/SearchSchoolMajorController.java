@@ -61,11 +61,11 @@ public class SearchSchoolMajorController {
             List<SchoolMajorDTO> results;
 
             if (school != null && major == null) {
-                results = searchSchoolMajorService.searchSchools(apiKey, school);
+                results = searchSchoolMajorService.searchSchools(school);
             } else if (school == null && major != null) {
-                results = searchSchoolMajorService.searchMajors(apiKey, major);
+                results = searchSchoolMajorService.searchMajors(major);
             } else {
-                results = searchSchoolMajorService.searchBySchoolAndMajor(apiKey, school, major);
+                results = searchSchoolMajorService.searchBySchoolAndMajor(school, major);
             }
 
             if (results.isEmpty()) {
@@ -82,6 +82,7 @@ public class SearchSchoolMajorController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new SearchResponse(false, e.getMessage(), null));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new SearchResponse(false, "서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.", null));
         }
