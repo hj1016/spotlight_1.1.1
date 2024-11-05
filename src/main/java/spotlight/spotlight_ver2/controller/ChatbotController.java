@@ -1,8 +1,18 @@
 package spotlight.spotlight_ver2.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import spotlight.spotlight_ver2.entity.User;
+import spotlight.spotlight_ver2.entity.Category;
+import spotlight.spotlight_ver2.repository.UserRepository;
+import spotlight.spotlight_ver2.response.ErrorResponse;
 import spotlight.spotlight_ver2.service.ChatbotService;
+import spotlight.spotlight_ver2.exception.NotFoundException;
+import spotlight.spotlight_ver2.service.StudentService;
+import spotlight.spotlight_ver2.service.UserService;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -10,13 +20,44 @@ import spotlight.spotlight_ver2.service.ChatbotService;
 public class ChatbotController {
 
     private final ChatbotService chatbotService;
+    private final UserService userService;
+    private final StudentService studentService;
 
-    public ChatbotController(ChatbotService chatbotService) {
+    @Autowired
+    public ChatbotController(ChatbotService chatbotService, UserService userService, UserRepository userRepository, StudentService studentService) {
         this.chatbotService = chatbotService;
+        this.userService = userService;
+        this.studentService = studentService;
     }
 
     @PostMapping("/ask")
-    public String askChatbot(@RequestBody String userInput) {
-        return chatbotService.getChatGPTResponse(userInput);
+    public ResponseEntity<?> askChatbot(@RequestParam Long userId, @RequestBody String userInput) {
+        try {
+            // userId로 User 객체 조회
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                throw new NotFoundException("해당 ID를 가진 사용자를 찾을 수 없습니다. ID: " + userId);
+            }
+
+            String userRole = String.valueOf(user.getRole()); // NORMAL, STUDENT, RECRUITER 중 하나
+            String userField = ""; // 사용자 필드 (STUDENT인 경우 설정됨)
+
+            if ("STUDENT".equals(userRole)) {
+                // 학생의 분야를 기반으로 프로젝트 추천
+                userField = studentService.determineStudentField(user.getStudent())
+                        .map(Category::getName) // Category의 name 필드를 추출
+                        .orElse(""); // 없으면 빈 문자열
+            }
+
+
+            // ChatGPT 기반 추천
+            String recommendations = chatbotService.getRecommendations(userField, userInput);
+            return ResponseEntity.ok(recommendations);
+
+        } catch (NotFoundException ex) {
+            return ErrorResponse.toResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
+        } catch (Exception ex) {
+            return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
+        }
     }
 }
