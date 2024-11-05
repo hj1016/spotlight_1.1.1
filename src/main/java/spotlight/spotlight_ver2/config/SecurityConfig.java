@@ -4,12 +4,15 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+// import spotlight.spotlight_ver2.security.ApiKeyAuthFilter;
 import spotlight.spotlight_ver2.security.ApiKeyAuthFilter;
 import spotlight.spotlight_ver2.security.JwtRequestFilter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,7 +37,6 @@ public class SecurityConfig {
         return new ApiKeyAuthFilter(chatGptApiKey, careerNetApiKey);
     }
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -45,6 +47,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/error").permitAll() // spring security의 계속된 403 error 반환을 막기 위함
+                        .requestMatchers("/api/user/**").permitAll()
                         .requestMatchers("/api/chatgpt/**", "/api/careernet/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -59,5 +62,10 @@ public class SecurityConfig {
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

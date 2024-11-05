@@ -7,7 +7,7 @@ import spotlight.spotlight_ver2.entity.User;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-11-03T00:39:28+0900",
+    date = "2024-11-05T17:17:51+0900",
     comments = "version: 1.5.4.Final, compiler: javac, environment: Java 21.0.3 (Oracle Corporation)"
 )
 public class ExhibitionMapperImpl implements ExhibitionMapper {

@@ -27,6 +27,10 @@ dependencies {
     implementation ("mysql:mysql-connector-java:8.0.32")
     implementation("com.google.firebase:firebase-admin:9.2.0")
     implementation ("io.jsonwebtoken:jjwt:0.9.1")
+    implementation ("javax.xml.bind:jaxb-api:2.3.1")
+    implementation ("org.glassfish.jaxb:jaxb-runtime:2.3.1")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation ("org.springframework.boot:spring-boot-starter-validation")
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")

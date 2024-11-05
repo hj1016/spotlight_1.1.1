@@ -1,9 +1,6 @@
 package spotlight.spotlight_ver2.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -56,10 +53,16 @@ public class JwtUtil {
 
     // 토큰에서 모든 클레임 추출
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            throw new IllegalArgumentException("토큰이 만료되었습니다.");
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
     }
 
     // 토큰의 유효성 검사

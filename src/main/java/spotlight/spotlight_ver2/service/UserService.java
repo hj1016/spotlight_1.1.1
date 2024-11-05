@@ -110,6 +110,9 @@ public class UserService {
 
         try {
             User resultUser = this.userRepository.save(newUser);
+            if (resultUser.getId() == null) {
+                throw new RuntimeException("사용자 등록 실패: ID가 null입니다.");
+            }
 
             if (role == Role.STUDENT) { // role.equals(Role.STUDENT)도 enum에선 같은 동작을 하지만 참조 비교를 하는 ==이 성능이 더 좋음
                 Student student = new Student();

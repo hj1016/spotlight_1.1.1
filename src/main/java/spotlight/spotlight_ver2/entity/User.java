@@ -27,6 +27,12 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    private Boolean emailVerified = false;
+
+    @Column(nullable = true)
+    private String emailCode;
+
+    @Column(nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -89,6 +95,22 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(Boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public String getEmailCode() {
+        return emailCode;
+    }
+
+    public void setEmailCode(String emailCode) {
+        this.emailCode = emailCode;
     }
 
     public String getName() {
