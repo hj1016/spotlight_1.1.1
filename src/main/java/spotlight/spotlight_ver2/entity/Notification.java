@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int notificationId;
+    private long notificationId;
 
     @Column(nullable = true)
     private String type;
@@ -32,11 +32,11 @@ public class Notification {
     @JoinColumn(name = "received_id", referencedColumnName = "id")
     private User receiver;
 
-    public int getNotificationId() {
+    public long getNotificationId() {
         return notificationId;
     }
 
-    public void setNotificationId(int notificationId) {
+    public void setNotificationId(long notificationId) {
         this.notificationId = notificationId;
     }
 

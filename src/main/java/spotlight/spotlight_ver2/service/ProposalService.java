@@ -3,6 +3,7 @@ package spotlight.spotlight_ver2.service;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import spotlight.spotlight_ver2.config.NotificationConstants;
 import spotlight.spotlight_ver2.dto.ProposalDTO;
 import spotlight.spotlight_ver2.entity.Proposal;
 import spotlight.spotlight_ver2.entity.Recruiter;
@@ -22,13 +23,15 @@ public class ProposalService {
     private final ProposalRepository proposalRepository;
     private final StudentRepository studentRepository;
     private final RecruiterRepository recruiterRepository;
+    private final NotificationService notificationService;
     private final ProposalMapper proposalMapper = ProposalMapper.INSTANCE;
 
     @Autowired
-    public ProposalService(ProposalRepository proposalRepository, StudentRepository studentRepository, RecruiterRepository recruiterRepository) {
+    public ProposalService(ProposalRepository proposalRepository, StudentRepository studentRepository, RecruiterRepository recruiterRepository, NotificationService notificationService) {
         this.proposalRepository = proposalRepository;
         this.studentRepository = studentRepository;
         this.recruiterRepository = recruiterRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -49,6 +52,10 @@ public class ProposalService {
 
         // Proposal 저장
         Proposal savedProposal = proposalRepository.save(proposal);
+
+        // 제안서 발송 알림 생성
+        String notificationMessage = recruiter.getUser().getName() + "님이 새로운 제안서를 보냈습니다.";
+        notificationService.createNotification(recruiter.getUser(), student.getUser(), NotificationConstants.TYPE_NEW_PROPOSAL, notificationMessage);
 
         return proposalMapper.toDTO(savedProposal);
     }
@@ -77,6 +84,10 @@ public class ProposalService {
 
         // 수정된 Proposal 저장
         Proposal updatedProposal = proposalRepository.save(existingProposal);
+
+        // 제안서 수정 알림 생성
+        String notificationMessage = recruiter.getUser().getName() + "님이 제안서를 수정했습니다.";
+        notificationService.createNotification(recruiter.getUser(), existingProposal.getStudent().getUser(), NotificationConstants.TYPE_UPDATED_PROPOSAL, notificationMessage);
 
         return proposalMapper.toDTO(updatedProposal);
     }
