@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-// import spotlight.spotlight_ver2.security.ApiKeyAuthFilter;
 import spotlight.spotlight_ver2.security.ApiKeyAuthFilter;
 import spotlight.spotlight_ver2.security.JwtRequestFilter;
 import org.springframework.security.config.http.SessionCreationPolicy;
