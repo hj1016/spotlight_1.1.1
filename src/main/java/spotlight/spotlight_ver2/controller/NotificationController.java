@@ -1,5 +1,9 @@
 package spotlight.spotlight_ver2.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notification")
+@Tag(name = "알림 API", description = "알림 관련 기능 제공")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -31,6 +36,11 @@ public class NotificationController {
     }
 
     @GetMapping
+    @Operation(summary = "알림 목록 조회", description = "현재 사용자에게 수신된 알림 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "알림 목록 조회 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 오류로 조회 실패")
+    })
     public ResponseEntity<?> getNotifications() {
         try {
             User receiver = userService.getCurrentUser();
@@ -45,6 +55,11 @@ public class NotificationController {
         }
     }
 
+    @Operation(summary = "알림 읽음 상태로 표시", description = "특정 알림을 \"읽음\" 상태로 변경합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "알림을 읽음 상태로 표시 성공"),
+            @ApiResponse(responseCode = "404", description = "알림을 찾을 수 없음")
+    })
     @PutMapping("/{notificationId}/status")
     public ResponseEntity<String> markAsRead(@PathVariable("notificationId") long notificationId) {
         try {

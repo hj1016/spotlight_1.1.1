@@ -3,6 +3,7 @@ package spotlight.spotlight_ver2.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import spotlight.spotlight_ver2.service.AuthenticationService;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "Authentication API", description = "사용자 인증 관리 API")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
 

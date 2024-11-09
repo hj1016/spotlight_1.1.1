@@ -1,5 +1,9 @@
 package spotlight.spotlight_ver2.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "User API", description = "회원 관련 기능 제공")
 public class UserController {
     private final UserService userService;
 
@@ -33,6 +38,13 @@ public class UserController {
     }
 
     // 회원가입
+    @Operation(summary = "회원가입", description = "회원 정보를 받아 새로운 사용자를 등록합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원가입 성공"),
+            @ApiResponse(responseCode = "409", description = "아이디 중복"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegistrationDTO registrationDto) {
         final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -57,12 +69,20 @@ public class UserController {
     }
 
     // 아이디 중복 체크
+    @Operation(summary = "아이디 중복 확인", description = "요청받은 아이디가 이미 사용 중인지 확인합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "아이디 사용 가능 여부 반환")
+    })
     @PostMapping("/existusername")
     public ResponseEntity<?> existUsername(@RequestBody ExistIdRequest existIdRequest) {
         return ResponseEntity.ok(new ExistIdResponse(userService.existUsername(existIdRequest.getUsername())));
     }
 
     // 비밀번호 유효성 확인
+    @Operation(summary = "비밀번호 유효성 검사", description = "비밀번호 유효성을 확인하고 결과를 반환합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비밀번호 유효성 검사 결과 반환")
+    })
     @PostMapping("/validate-password")
     public ResponseEntity<PasswordValidationResponseDTO> validatePassword(@RequestBody PasswordValidationDTO passwordDTO) {
         PasswordValidationResponseDTO response = userService.validatePassword(passwordDTO.getPassword());
