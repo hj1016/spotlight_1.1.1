@@ -17,11 +17,13 @@ import spotlight.spotlight_ver2.dto.UserRegistrationDTO;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.DuplicateUsernameException;
+import spotlight.spotlight_ver2.request.EmailSendingRequest;
 import spotlight.spotlight_ver2.request.ExistIdRequest;
 import spotlight.spotlight_ver2.response.ErrorResponse;
 import spotlight.spotlight_ver2.response.ExistIdResponse;
 import spotlight.spotlight_ver2.response.UserResponse;
 import spotlight.spotlight_ver2.service.UserService;
+import spotlight.spotlight_ver2.service.AuthenticationService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +33,12 @@ import org.slf4j.LoggerFactory;
 @Tag(name = "User API", description = "회원 관련 기능 제공")
 public class UserController {
     private final UserService userService;
+    private final AuthenticationService authenticationService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthenticationService authenticationService) {
         this.userService = userService;
+        this.authenticationService = authenticationService;
     }
 
     // 회원가입
@@ -87,5 +91,45 @@ public class UserController {
     public ResponseEntity<PasswordValidationResponseDTO> validatePassword(@RequestBody PasswordValidationDTO passwordDTO) {
         PasswordValidationResponseDTO response = userService.validatePassword(passwordDTO.getPassword());
         return ResponseEntity.ok(response);
+    }
+
+    // 이메일 인증 코드 발송
+    @Operation(summary = "이메일 인증 코드 발송", description = "사용자에게 이메일 인증 코드를 발송합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일 인증 코드 발송 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청, 이메일 전송 실패")
+    })
+    @PostMapping("/send-email-verification")
+    public ResponseEntity<?> sendEmailVerification(@RequestBody EmailSendingRequest emailSendingRequest) {
+        try {
+            boolean success = authenticationService.sendEmailVerificationCode(emailSendingRequest, emailSendingRequest.getRole());
+            if (success) {
+                return ResponseEntity.ok("이메일 인증 코드가 발송되었습니다.");
+            } else {
+                return ResponseEntity.badRequest().body("이메일 발송에 실패했습니다.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("서버 오류가 발생했습니다.");
+        }
+    }
+
+    // 이메일 인증 코드 검증
+    @Operation(summary = "이메일 인증 코드 검증", description = "사용자가 입력한 이메일 인증 코드를 검증합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일 인증 코드 검증 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 인증 코드")
+    })
+    @PostMapping("/verify-email-verification")
+    public ResponseEntity<?> verifyEmailVerification(@RequestBody EmailSendingRequest emailSendingRequest) {
+        try {
+            boolean success = authenticationService.verifyEmailCode(emailSendingRequest, emailSendingRequest.getRole());
+            if (success) {
+                return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
+            } else {
+                return ResponseEntity.badRequest().body("잘못된 인증 코드입니다.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("서버 오류가 발생했습니다.");
+        }
     }
 }
