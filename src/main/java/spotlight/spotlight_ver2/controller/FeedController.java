@@ -395,7 +395,7 @@ public class FeedController {
             }
 
             // 스크랩 취소 기능 호출
-            scrapService.unsrapStudent(studentId, currentUser);
+            scrapService.unscrapStudent(studentId, currentUser);
 
             return ResponseEntity.ok("학생 스크랩을 취소했습니다.");
         } catch (UnauthorizedException e) {

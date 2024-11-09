@@ -19,13 +19,11 @@ public class ScrapService {
 
     private final ScrapRepository scrapRepository;
     private final StudentRepository studentRepository;
-    private final UserRepository userRepository;
     private final FeedRepository feedRepository;
 
-    public ScrapService(ScrapRepository scrapRepository, StudentRepository studentRepository, UserRepository userRepository, FeedRepository feedRepository) {
+    public ScrapService(ScrapRepository scrapRepository, StudentRepository studentRepository, FeedRepository feedRepository) {
         this.scrapRepository = scrapRepository;
         this.studentRepository = studentRepository;
-        this.userRepository = userRepository;
         this.feedRepository = feedRepository;
     }
 
@@ -90,7 +88,7 @@ public class ScrapService {
         scrapRepository.save(scrap);
     }
 
-    public void unsrapStudent(Long studentId, User recruiter) {
+    public void unscrapStudent(Long studentId, User recruiter) {
         if (!recruiter.getRole().equals(Role.RECRUITER)) {
             throw new UnauthorizedException("학생을 스크랩 취소하기 위해서는 RECRUITER 역할이 필요합니다.");
         }
