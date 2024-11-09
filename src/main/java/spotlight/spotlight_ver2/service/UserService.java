@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import spotlight.spotlight_ver2.dto.PasswordValidationResponseDTO;
 import spotlight.spotlight_ver2.dto.UserRegistrationDTO;
@@ -68,6 +69,7 @@ public class UserService {
     }
 
     // 회원가입 새로운 유저 등록
+    @Transactional
     public User registerNewUser(UserRegistrationDTO userRegistrationDTO) {
         if (userRegistrationDTO.getEmail() == null || userRegistrationDTO.getEmail().isEmpty()) {
             throw new IllegalArgumentException("이메일은 공백일 수 없습니다.");
