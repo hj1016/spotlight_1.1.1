@@ -6,11 +6,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import spotlight.spotlight_ver2.entity.Student;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.request.UploadPortfolioRequest;
@@ -24,7 +27,7 @@ import java.util.Optional;
 @RequestMapping("/api/user")
 @Tag(name = "포트폴리오 API", description = "포트폴리오 업로드 및 조회 기능 제공")
 public class PortfolioController {
-
+    private final Logger logger = LoggerFactory.getLogger(PortfolioController.class);
     private final UserService userService;
     private final PortfolioService portfolioService;
 
@@ -41,13 +44,14 @@ public class PortfolioController {
             @ApiResponse(responseCode = "500", description = "서버 오류로 업로드 실패")
     })
     @PostMapping("/portfolio")
-    public ResponseEntity uploadPortfolio(@ModelAttribute UploadPortfolioRequest request) {
+    public ResponseEntity<?> uploadPortfolio(@ModelAttribute UploadPortfolioRequest uploadRequest) {
         try {
             User user = userService.getCurrentUser();
-            UploadPortfolioResponse response = portfolioService.uploadPortfolio(user, request);
+            UploadPortfolioResponse response = portfolioService.uploadPortfolio(user, uploadRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다. 나중에 다시 시도해 주세요.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버에서 오류가 발생했습니다. 나중에 다시 시도해 주세요.");
         }
     }
 

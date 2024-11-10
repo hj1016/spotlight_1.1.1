@@ -9,6 +9,8 @@ public class UserProfileDTO {
     private String major;
     private String company;
 
+    public UserProfileDTO() {}
+
     public UserProfileDTO(String name, String username, String password, String profileImageUrl,
                           String school, String major, String company) {
         this.name = name;

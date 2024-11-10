@@ -21,7 +21,7 @@ public class Student {
     @Column(name = "pf_path")
     private String portfolioImage;
 
-    @Column(name = "student_certificate", nullable = true)
+    @Column(name = "student_certificate", nullable = true, length = 2000)
     private String studentCertificate;
 
     @OneToOne

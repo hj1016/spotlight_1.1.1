@@ -11,5 +11,4 @@ public class UploadPortfolioResponse {
     private boolean success;
     private String message;
     private List<String> portfolioList;
-
 }

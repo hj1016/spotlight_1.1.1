@@ -41,7 +41,7 @@ public class User {
     @Column(name = "access_token")
     private String accessToken;
 
-    @Column(name = "profile_image")
+    @Column(name = "profile_image", length = 2000)
     private String profileImage;
 
     @CreationTimestamp

@@ -18,8 +18,7 @@ public class UserProfileController {
     // 사용자 프로필 조회
     @GetMapping
     public ResponseEntity<UserProfileDTO> getUserProfile(@RequestHeader("Authorization") String token) {
-        String jwtToken = token.substring(7);
-        UserProfileDTO userProfile = userProfileService.getUserProfile(jwtToken);
+        UserProfileDTO userProfile = userProfileService.getUserProfile(token);
         return ResponseEntity.ok(userProfile);
     }
 
@@ -27,8 +26,7 @@ public class UserProfileController {
     @PutMapping
     public ResponseEntity<UserProfileDTO> updateUserProfile(@RequestHeader("Authorization") String token,
                                                             @RequestBody UserProfileDTO userProfileDTO) {
-        String jwtToken = token.substring(7);
-        UserProfileDTO updatedProfile = userProfileService.updateUserProfile(jwtToken, userProfileDTO);
+        UserProfileDTO updatedProfile = userProfileService.updateUserProfile(token, userProfileDTO);
         return ResponseEntity.ok(updatedProfile);
     }
 }

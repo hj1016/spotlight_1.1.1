@@ -21,7 +21,7 @@ public class EmailSendingRequest {
         return username;
     }
 
-    public void setUsername(String id) {
+    public void setUsername(String username) {
         this.username = username;
     }
 

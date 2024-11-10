@@ -23,14 +23,18 @@ public class UserProfileService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
+        String school = user.getStudent() != null ? user.getStudent().getSchool() : null;
+        String major = user.getStudent() != null ? user.getStudent().getMajor() : null;
+        String company = user.getRecruiter() != null ? user.getRecruiter().getCompany() : null;
+
         return new UserProfileDTO(
                 user.getName(),
                 user.getUsername(),
-                "********", // 비밀번호는 표시하지 않음
+                "********",
                 user.getProfileImage(),
-                user.getStudent() != null ? user.getStudent().getSchool() : null,
-                user.getStudent() != null ? user.getStudent().getMajor() : null,
-                user.getRecruiter() != null ? user.getRecruiter().getCompany() : null // 수정된 부분
+                school,
+                major,
+                company
         );
     }
 
@@ -48,18 +52,23 @@ public class UserProfileService {
             user.getStudent().setSchool(userProfileDTO.getSchool());
             user.getStudent().setMajor(userProfileDTO.getMajor());
         }
+
         if (user.getRecruiter() != null) {
             user.getRecruiter().setCompany(userProfileDTO.getCompany());
         }
 
+        String school = user.getStudent() != null ? user.getStudent().getSchool() : null;
+        String major = user.getStudent() != null ? user.getStudent().getMajor() : null;
+        String company = user.getRecruiter() != null ? user.getRecruiter().getCompany() : null;
+
         return new UserProfileDTO(
                 user.getName(),
                 user.getUsername(),
-                "********", // 비밀번호
+                "********", // 비밀번호는 표시하지 않음
                 user.getProfileImage(),
-                user.getStudent() != null ? user.getStudent().getSchool() : null,
-                user.getStudent() != null ? user.getStudent().getMajor() : null,
-                user.getRecruiter() != null ? user.getRecruiter().getCompany() : null
+                school,
+                major,
+                company
         );
     }
 }

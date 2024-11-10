@@ -15,7 +15,7 @@ public class Recruiter {
     @Column(name = "company", nullable = false)
     private String company;
 
-    @Column(name = "recruiter_certificate", nullable = true)
+    @Column(name = "recruiter_certificate", nullable = true, length = 2000)
     private String recruiterCertificate;
 
     public Long getUserId() {

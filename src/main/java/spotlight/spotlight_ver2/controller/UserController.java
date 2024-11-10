@@ -6,19 +6,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import spotlight.spotlight_ver2.dto.PasswordValidationDTO;
 import spotlight.spotlight_ver2.dto.PasswordValidationResponseDTO;
 import spotlight.spotlight_ver2.dto.UserRegistrationDTO;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.DuplicateUsernameException;
+import spotlight.spotlight_ver2.repository.UserRepository;
+import spotlight.spotlight_ver2.request.CertificateRequest;
 import spotlight.spotlight_ver2.request.EmailSendingRequest;
 import spotlight.spotlight_ver2.request.ExistIdRequest;
+import spotlight.spotlight_ver2.response.CertificateResponse;
 import spotlight.spotlight_ver2.response.ErrorResponse;
 import spotlight.spotlight_ver2.response.ExistIdResponse;
 import spotlight.spotlight_ver2.response.UserResponse;
@@ -28,17 +30,24 @@ import spotlight.spotlight_ver2.service.AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/user")
 @Tag(name = "User API", description = "회원 관련 기능 제공")
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final AuthenticationService authenticationService;
+    private final UserRepository userRepository;
+    private final CertificateRequest certificateRequest;
 
     @Autowired
-    public UserController(UserService userService, AuthenticationService authenticationService) {
+    public UserController(UserService userService, AuthenticationService authenticationService, UserRepository userRepository, CertificateRequest certificateRequest) {
         this.userService = userService;
         this.authenticationService = authenticationService;
+        this.userRepository = userRepository;
+        this.certificateRequest = certificateRequest;
     }
 
     // 회원가입
@@ -85,12 +94,24 @@ public class UserController {
     // 비밀번호 유효성 확인
     @Operation(summary = "비밀번호 유효성 검사", description = "비밀번호 유효성을 확인하고 결과를 반환합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "비밀번호 유효성 검사 결과 반환")
+            @ApiResponse(responseCode = "200", description = "비밀번호 유효성 검사 결과 반환"),
+            @ApiResponse(responseCode = "400", description = "잘못된 비밀번호"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping("/validate-password")
     public ResponseEntity<PasswordValidationResponseDTO> validatePassword(@RequestBody PasswordValidationDTO passwordDTO) {
-        PasswordValidationResponseDTO response = userService.validatePassword(passwordDTO.getPassword());
-        return ResponseEntity.ok(response);
+        try {
+            PasswordValidationResponseDTO response = userService.validatePassword(passwordDTO.getPassword());
+            if (response.isValid()) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            logger.error("비밀번호 유효성 검사 중 오류 발생: ", e);
+            return ResponseEntity.internalServerError()
+                    .body(PasswordValidationResponseDTO.failure("서버에서 오류가 발생했습니다."));
+        }
     }
 
     // 이메일 인증 코드 발송
@@ -102,6 +123,10 @@ public class UserController {
     @PostMapping("/send-email-verification")
     public ResponseEntity<?> sendEmailVerification(@RequestBody EmailSendingRequest emailSendingRequest) {
         try {
+            if (emailSendingRequest.getEmail() == null || emailSendingRequest.getUsername() == null) {
+                return ResponseEntity.badRequest().body("이메일과 사용자명은 필수 항목입니다.");
+            }
+
             boolean success = authenticationService.sendEmailVerificationCode(emailSendingRequest, emailSendingRequest.getRole());
             if (success) {
                 return ResponseEntity.ok("이메일 인증 코드가 발송되었습니다.");
@@ -131,5 +156,43 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("서버 오류가 발생했습니다.");
         }
+    }
+
+    @Operation(summary = "학생 재학증명서 업로드", description = "학생의 재학증명서를 업로드합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "재학증명서 업로드 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/upload-student-certificate")
+    public ResponseEntity<CertificateResponse> uploadStudentCertificate(
+            @RequestBody CertificateRequest certificateRequest) {
+
+        String username = certificateRequest.getUsername();
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        CertificateResponse response = userService.uploadStudentCertificate(currentUser, certificateRequest);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @Operation(summary = "리크루터 재직증명서 업로드", description = "리크루터의 재직증명서를 업로드합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "재직증명서 업로드 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @PostMapping("/upload-recruiter-certificate")
+    public ResponseEntity<CertificateResponse> uploadRecruiterCertificate(
+            @ModelAttribute CertificateRequest certificateRequest) {
+        User currentUser = userService.getUserByUsername(certificateRequest.getUsername());
+        if (currentUser == null) {
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+        }
+        CertificateResponse response = userService.uploadRecruiterCertificate(currentUser, certificateRequest);
+        return ResponseEntity.ok(response);
     }
 }

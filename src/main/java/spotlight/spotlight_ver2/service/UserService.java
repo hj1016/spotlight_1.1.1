@@ -1,7 +1,8 @@
 package spotlight.spotlight_ver2.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,7 @@ import spotlight.spotlight_ver2.entity.Recruiter;
 import spotlight.spotlight_ver2.entity.Student;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.enums.Role;
+import spotlight.spotlight_ver2.exception.ImageUploadException;
 import spotlight.spotlight_ver2.repository.RecruiterRepository;
 import spotlight.spotlight_ver2.repository.StudentRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
@@ -33,8 +35,7 @@ public class UserService {
     private final RecruiterRepository recruiterRepository;
     private final StudentRepository studentRepository;
     private final UploadImageService uploadImageService;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     public UserService(UserRepository userRepository, RecruiterRepository recruiterRepository, StudentRepository studentRepository, UploadImageService uploadImageService) {
@@ -60,12 +61,12 @@ public class UserService {
     // 비밀번호 유효성 검사
     public PasswordValidationResponseDTO validatePassword(String password) {
         if (password == null || password.isEmpty()) {
-            return new PasswordValidationResponseDTO(false, "비밀번호는 공백일 수 없습니다.");
+            return PasswordValidationResponseDTO.failure("비밀번호는 공백일 수 없습니다.");
         }
         if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$")) {
-            return new PasswordValidationResponseDTO(false, "비밀번호는 최소 8자 이상이어야 하며, 영문자와 숫자를 포함해야 합니다.");
+            return PasswordValidationResponseDTO.failure("비밀번호는 최소 8자 이상이어야 하며, 영문자와 숫자를 포함해야 합니다.");
         }
-        return new PasswordValidationResponseDTO(true, "유효한 비밀번호입니다.");
+        return PasswordValidationResponseDTO.success("유효한 비밀번호입니다.");
     }
 
     // 회원가입 새로운 유저 등록
@@ -160,13 +161,12 @@ public class UserService {
                 certificateResponse.setCertificate(imageUrl);
                 certificateResponse.setSuccess(true);
             } catch (IOException e) {
-                throw new RuntimeException("학생 재학증명서 업로드에 실패했습니다.", e);
+                throw new ImageUploadException("학생 재학증명서 업로드에 실패했습니다.", e);
             }
         } else {
             certificateResponse.setSuccess(false);
-            certificateResponse.setMessage("재학증명서가 유효하지 않거나 학생 정보가 없습니다.");  // setMessage 추가
+            certificateResponse.setMessage("재학증명서가 유효하지 않거나 학생 정보가 없습니다.");
         }
-
         return certificateResponse;
     }
 
@@ -200,10 +200,16 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("해당 아이디로 등록된 사용자가 없습니다."));
+    }
+
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
             String username = authentication.getName();
+            logger.info(username);
             return userRepository.findByUsername(username).orElse(null);
         }
         return null;
