@@ -34,8 +34,7 @@ public class ChatbotService {
         this.restTemplate = restTemplate;
         this.categoryRepository = categoryRepository;
 
-        // dotenv로 .env 파일에서 변수 읽기
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv.configure().load();
         this.apiKey = dotenv.get("CHATGPT_SECRET_KEY");
         this.model = dotenv.get("OPENAI_MODEL");
     }
