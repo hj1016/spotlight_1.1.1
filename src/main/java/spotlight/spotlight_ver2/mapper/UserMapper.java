@@ -27,6 +27,7 @@ public interface UserMapper {
     @Mapping(target = "feeds", source = "feeds", qualifiedByName = "mapDTOListToFeedList")
     @Mapping(target = "hashtags", source = "hashtags", qualifiedByName = "mapDTOListToHashtagList")
     @Mapping(target = "scraps", source = "scraps", qualifiedByName = "mapDTOListToScrapList")
+    @Mapping(target = "emailCode", ignore = true)
     @Mapping(target = "student", ignore = true)
     @Mapping(target = "recruiter", ignore = true)
     @Mapping(target = "password", ignore = true)

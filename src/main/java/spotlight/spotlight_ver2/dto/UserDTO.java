@@ -24,6 +24,9 @@ public class UserDTO {
     @Schema(description = "이메일 주소", example = "김학생@example.com")
     private String email;
 
+    @Schema(description = "이메일 인증 여부", example = "false")
+    private Boolean emailVerified = false;
+
     @Schema(description = "사용자 실명", example = "김학생")
     private String name;
 
@@ -61,6 +64,7 @@ public class UserDTO {
         this.id = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
+        this.emailVerified = user.getEmailVerified();
         this.name = user.getName();
         this.profileImage = user.getProfileImage();
         this.createdDate = user.getCreatedDate();

@@ -33,6 +33,8 @@ public interface FeedMapper {
     @Mapping(target = "category.feeds", ignore = true)
     @Mapping(target = "user.username", ignore = true)
     @Mapping(target = "user.email", ignore = true)
+    @Mapping(target = "user.emailVerified", ignore = true)
+    @Mapping(target = "user.emailCode", ignore = true)
     @Mapping(target = "user.password", ignore = true)
     @Mapping(target = "user.role", ignore = true)
     @Mapping(target = "user.accessToken", ignore = true)
