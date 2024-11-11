@@ -31,12 +31,11 @@ public class ChatbotController {
     }
 
     @PostMapping("/ask")
-    public ResponseEntity<?> askChatbot(@RequestParam Long userId, @RequestBody String userInput) {
+    public ResponseEntity<?> askChatbot(@RequestBody String userInput) {
         try {
-            // userId로 User 객체 조회
-            User user = userService.getUserById(userId);
+            User user = userService.getCurrentUser();
             if (user == null) {
-                throw new NotFoundException("해당 ID를 가진 사용자를 찾을 수 없습니다. ID: " + userId);
+                throw new NotFoundException("현재 인증된 사용자가 없습니다.");
             }
 
             String userRole = String.valueOf(user.getRole()); // NORMAL, STUDENT, RECRUITER 중 하나
@@ -48,7 +47,6 @@ public class ChatbotController {
                         .map(Category::getName) // Category의 name 필드를 추출
                         .orElse(""); // 없으면 빈 문자열
             }
-
 
             // ChatGPT 기반 추천
             String recommendations = chatbotService.getRecommendations(userField, userInput);
