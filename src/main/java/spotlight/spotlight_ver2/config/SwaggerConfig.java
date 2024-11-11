@@ -19,8 +19,6 @@ public class SwaggerConfig {
                         .version("1.0")
                         .description("Spring Boot REST API documentation using springdoc-openapi and OpenAPI 3."))
                 .components(new Components()
-
-                        /*
                         // JWT 인증 스키마 추가
                         .addSecuritySchemes("bearerAuth",
                                 new SecurityScheme()
@@ -28,14 +26,13 @@ public class SwaggerConfig {
                                         .scheme("bearer")
                                         .bearerFormat("JWT"))
 
-                         */
-
                         // API 키 인증 스키마 추가
                         .addSecuritySchemes("apiKeyAuth",
                                 new SecurityScheme()
                                         .type(SecurityScheme.Type.APIKEY)
                                         .in(SecurityScheme.In.HEADER)
-                                        .name("X-API-KEY")))
+                                        .name("X-API-KEY"))
+                )
                 // 모든 요청에 기본적으로 인증 스키마 적용
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth").addList("apiKeyAuth"));
     }

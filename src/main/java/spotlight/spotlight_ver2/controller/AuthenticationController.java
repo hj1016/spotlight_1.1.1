@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.request.AuthenticationRequest;
+import spotlight.spotlight_ver2.request.RefreshTokenRequest;
 import spotlight.spotlight_ver2.security.JwtUtil;
 import spotlight.spotlight_ver2.service.AuthenticationService;
 
@@ -54,9 +55,9 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청, 리프레시 토큰 만료 또는 유효하지 않음")
     })
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshAccessToken(@RequestBody String refreshToken) {
+    public ResponseEntity<?> refreshAccessToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         try {
-            String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+            String newAccessToken = jwtUtil.refreshAccessToken(refreshTokenRequest.getRefreshToken());
 
             Map<String, String> response = new HashMap<>();
             response.put("accessToken", "Bearer " + newAccessToken);
