@@ -22,15 +22,26 @@ public class NotificationResponseMapper {
     }
 
     private String getRelativeTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "Unknown";
+        }
+
         LocalDateTime now = LocalDateTime.now();
         Duration duration = Duration.between(dateTime, now);
+
         long days = duration.toDays();
-        if (days == 0) {
-            return "Today";
+        if (days > 1) {
+            return days + " days ago";
         } else if (days == 1) {
             return "Yesterday";
         } else {
-            return days + " days ago";
+            long hours = duration.toHours();
+            if (hours >= 1) {
+                return hours + " hours ago";
+            } else {
+                long minutes = duration.toMinutes();
+                return minutes + " minutes ago";
+            }
         }
     }
 }

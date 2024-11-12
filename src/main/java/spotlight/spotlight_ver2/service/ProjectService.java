@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import spotlight.spotlight_ver2.entity.*;
 import spotlight.spotlight_ver2.exception.*;
+import spotlight.spotlight_ver2.exception.IllegalAccessException;
+import spotlight.spotlight_ver2.mapper.NotificationResponseMapper;
 import spotlight.spotlight_ver2.repository.*;
 
 import java.util.List;
@@ -15,17 +17,20 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectRoleRepository projectRoleRepository;
     private final StudentRepository studentRepository;
-    private final NotificationRepository notificationRepository;
     private final FeedRepository feedRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
+    private final NotificationResponseMapper notificationResponseMapper;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, ProjectRoleRepository projectRoleRepository,
-                          StudentRepository studentRepository, NotificationRepository notificationRepository, FeedRepository feedRepository) {
+    public ProjectService(ProjectRepository projectRepository, ProjectRoleRepository projectRoleRepository, StudentRepository studentRepository, FeedRepository feedRepository, NotificationRepository notificationRepository, NotificationService notificationService, NotificationResponseMapper notificationResponseMapper) {
         this.projectRepository = projectRepository;
         this.projectRoleRepository = projectRoleRepository;
         this.studentRepository = studentRepository;
-        this.notificationRepository = notificationRepository;
         this.feedRepository = feedRepository;
+        this.notificationRepository = notificationRepository;
+        this.notificationService = notificationService;
+        this.notificationResponseMapper = notificationResponseMapper;
     }
 
     // 특정 학생이 수락하지 않은 초대장을 찾는 메서드
@@ -33,14 +38,14 @@ public class ProjectService {
         return projectRoleRepository.findByStudentAndAcceptedFalse(student);
     }
 
-    public ProjectRole inviteTeamMember(Long projectId, Long studentId, String role) {
+    public ProjectRole inviteTeamMember(Long projectId, Long userId, String role) {
         // 프로젝트를 ID로 조회
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다. ID: " + projectId));
 
-        // 학생을 ID로 조회
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("학생을 찾을 수 없습니다. ID: " + studentId));
+        // 사용자 ID로 학생을 조회
+        Student student = studentRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 사용자 ID로 학생을 찾을 수 없습니다. ID: " + userId));
 
         // 새로운 ProjectRole 객체 생성
         ProjectRole projectRole = new ProjectRole();
@@ -52,35 +57,36 @@ public class ProjectService {
         // ProjectRole 저장
         projectRoleRepository.save(projectRole);
 
-        // 초대 알림 생성 및 저장 (임시: Notification Refactoring 후 다시 수정 필요)
-        Notification notification = new Notification();
-        notification.setType("INVITATION"); // 초대 타입
-        notification.setStatus("UNREAD"); // 읽지 않음 상태
-        notification.setMessage("프로젝트 '" + project.getName() + "'에 초대되었습니다.");
-        notification.setSender(project.getCreator()); // 프로젝트 생성자
-        notification.setReceiver(student.getUser()); // 초대받는 학생
-        notificationRepository.save(notification);
+        notificationService.createNotification(
+                project.getCreator(),
+                student.getUser(),
+                "초대",
+                "프로젝트 '" + project.getName() + "'에 초대되었습니다."
+        );
 
         return projectRole;
     }
 
-    public void acceptInvitation(Long projectRoleId) {
+    public void acceptInvitation(Long projectRoleId, Long userId) {
         // ProjectRole을 ID로 조회
         ProjectRole projectRole = projectRoleRepository.findById(projectRoleId)
                 .orElseThrow(() -> new NotFoundException("ProjectRole을 찾을 수 없습니다. ID: " + projectRoleId));
+
+        // 초대를 받은 사용자인지 확인
+        if (!projectRole.getStudent().getUser().getId().equals(userId)) {
+            throw new IllegalAccessException("해당 초대를 수락할 권한이 없습니다.");
+        }
 
         // 초대 수락 상태로 변경
         projectRole.setAccepted(true);
         projectRoleRepository.save(projectRole);
 
-        // 수락 알림 생성 및 저장 (임시: Notification Refactoring 후 다시 수정 필요)
-        Notification notification = new Notification();
-        notification.setType("ACCEPTANCE"); // 수락 타입
-        notification.setStatus("UNREAD"); // 읽지 않음 상태
-        notification.setMessage("프로젝트 '" + projectRole.getProject().getName() + "'에 대한 초대가 수락되었습니다.");
-        notification.setSender(projectRole.getStudent().getUser()); // 초대를 수락한 학생
-        notification.setReceiver(projectRole.getProject().getCreator()); // 프로젝트 생성자
-        notificationRepository.save(notification);
+        notificationService.createNotification(
+                projectRole.getStudent().getUser(),
+                projectRole.getProject().getCreator(),
+                "수락",
+                "프로젝트 '" + projectRole.getProject().getName() + "'에 대한 초대가 수락되었습니다."
+        );
     }
 
     // 키워드를 기반으로 프로젝트를 검색
