@@ -6,7 +6,9 @@ import lombok.Setter;
 import spotlight.spotlight_ver2.entity.*;
 
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,16 +77,22 @@ public class FeedDTO {
         this.createdDate = feed.getCreatedDate();
         this.modifiedDate = feed.getModifiedDate();
 
-        // 카테고리와 사용자 ID만 포함하는 방식
-        this.category = feed.getCategory() != null ? new FeedCategoryDTO(feed.getCategory()) : null;
-        this.user = feed.getUser() != null ? new FeedUserDTO(feed.getUser()) : null;
-        this.exhibition = feed.getExhibition() != null ? new FeedExhibitionDTO(feed.getExhibition()) : null;
-        this.project = feed.getProject() != null ? new FeedProjectDTO(feed.getProject()) : null;
+        this.category = Optional.ofNullable(feed.getCategory())
+                .map(FeedCategoryDTO::new)
+                .orElse(null);
+        this.user = Optional.ofNullable(feed.getUser())
+                .map(FeedUserDTO::new)
+                .orElse(null);
+        this.exhibition = Optional.ofNullable(feed.getExhibition())
+                .map(FeedExhibitionDTO::new)
+                .orElse(null);
+        this.project = Optional.ofNullable(feed.getProject())
+                .map(FeedProjectDTO::new)
+                .orElse(null);
 
-        // 해시태그 변환 로직
-        this.hashtags = feed.getHashtags().stream()
-                .map(FeedHashtagDTO::new)
-                .collect(Collectors.toSet());
+        this.hashtags = feed.getHashtags() != null
+                ? feed.getHashtags().stream().map(FeedHashtagDTO::new).collect(Collectors.toSet())
+                : Collections.emptySet();
     }
 
     /* 참조할 CategoryDTO */
@@ -172,11 +180,12 @@ public class FeedDTO {
 
         public FeedProjectDTO() {}
 
-        public FeedProjectDTO(Project project){
+        public FeedProjectDTO(Project project) {
             this.id = project.getId();
             this.name = project.getName();
-            // studentRoles 맵을 리스트로 변환하여 projectRoles에 저장
-            this.projectRoles = project.getProjectRoles().values().stream()
+            this.projectRoles = Optional.ofNullable(project.getProjectRoles())
+                    .orElse(Collections.emptyMap())
+                    .values().stream()
                     .map(ProjectRoleDTO::new)
                     .collect(Collectors.toList());
         }

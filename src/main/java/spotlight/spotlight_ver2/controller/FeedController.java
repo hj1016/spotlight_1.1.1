@@ -2,6 +2,8 @@ package spotlight.spotlight_ver2.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,14 +14,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.FeedDTO;
+import spotlight.spotlight_ver2.dto.FeedHitsDTO;
 import spotlight.spotlight_ver2.dto.StudentDTO;
+import spotlight.spotlight_ver2.entity.Feed;
 import spotlight.spotlight_ver2.entity.Stage;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.*;
+import spotlight.spotlight_ver2.repository.FeedRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
 import spotlight.spotlight_ver2.response.ErrorResponse;
-import spotlight.spotlight_ver2.security.CustomUserDetails;
 import spotlight.spotlight_ver2.service.FeedService;
 import spotlight.spotlight_ver2.service.ScrapService;
 import spotlight.spotlight_ver2.service.SearchHistoryService;
@@ -35,6 +39,9 @@ public class FeedController {
     private final FeedService feedService;
 
     @Autowired
+    private final FeedRepository feedRepository;
+
+    @Autowired
     private final SearchHistoryService searchHistoryService;
 
     @Autowired
@@ -45,8 +52,9 @@ public class FeedController {
     private final UserRepository userRepository;
 
     @Autowired
-    public FeedController(FeedService feedService, SearchHistoryService searchHistoryService, ScrapService scrapService, UserRepository userRepository) {
+    public FeedController(FeedService feedService, FeedRepository feedRepository, SearchHistoryService searchHistoryService, ScrapService scrapService, UserRepository userRepository) {
         this.feedService = feedService;
+        this.feedRepository = feedRepository;
         this.searchHistoryService = searchHistoryService;
         this.scrapService = scrapService;
         this.userRepository = userRepository;
@@ -209,7 +217,7 @@ public class FeedController {
 
     @Operation(summary = "피드 조회수 집계", description = "사용자별 피드 조회수를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회수 집계 성공"),
+            @ApiResponse(responseCode = "200", description = "조회수 집계 성공", content = @Content(schema = @Schema(implementation = FeedHitsDTO.class))),
             @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음"),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
@@ -223,8 +231,8 @@ public class FeedController {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-            FeedDTO feedDTO = feedService.incrementHits(feedId, user);
-            return ResponseEntity.ok(feedDTO);
+            FeedHitsDTO feedHitsDTO = feedService.incrementHits(feedId, user);
+            return ResponseEntity.ok(feedHitsDTO);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -236,14 +244,14 @@ public class FeedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "스크랩 성공"),
             @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음"),
-            @ApiResponse(responseCode = "400", description = "이미 스크랩된 피드"),
+            @ApiResponse(responseCode = "400", description = "이미 스크랩된 피드 또는 잘못된 요청"),
             @ApiResponse(responseCode = "401", description = "권한 없음")
     })
     @PostMapping("/{feedId}/scrap")
     public ResponseEntity<?> scrapFeed(
-            @PathVariable Long feedId,
-            @RequestParam Long stageId,
-            @RequestParam Long scrappedUserId) {
+            @PathVariable(required = false) Long feedId,
+            @RequestParam(required = false) Long stageId,
+            @RequestParam(required = false) Long scrappedUserId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
@@ -251,12 +259,23 @@ public class FeedController {
             User currentUser = userRepository.findByUsername(username)
                     .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
 
-            User scrappedUser = userRepository.findById(scrappedUserId)
-                    .orElseThrow(() -> new NotFoundException("스크랩할 사용자를 찾을 수 없습니다."));
+            if ((feedId != null && (stageId != null || scrappedUserId != null)) ||
+                    (stageId != null && (feedId != null || scrappedUserId != null)) ||
+                    (scrappedUserId != null && (feedId != null || stageId != null))) {
+                throw new BadRequestException("feedId, stageId, scrappedUserId 중 하나만 설정해야 합니다.");
+            }
 
-            // Stage 객체 생성 및 ID 설정
-            Stage stage = new Stage();
-            stage.setId(stageId);
+            Feed feed = (feedId != null) ? feedRepository.findById(feedId)
+                    .orElseThrow(() -> new NotFoundException("스크랩할 게시물을 찾을 수 없습니다.")) : null;
+
+            User scrappedUser = (scrappedUserId != null) ? userRepository.findById(scrappedUserId)
+                    .orElseThrow(() -> new NotFoundException("스크랩할 사용자를 찾을 수 없습니다.")) : null;
+
+            Stage stage = null;
+            if (stageId != null) {
+                stage = new Stage();
+                stage.setId(stageId);
+            }
 
             Map<String, Object> response = scrapService.scrapFeed(feedId, currentUser, stage, scrappedUser);
             return ResponseEntity.ok(response);
@@ -275,11 +294,14 @@ public class FeedController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "스크랩 취소 성공"),
             @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없음"),
-            @ApiResponse(responseCode = "400", description = "스크랩되지 않은 피드"),
+            @ApiResponse(responseCode = "400", description = "스크랩되지 않은 피드 또는 잘못된 요청"),
             @ApiResponse(responseCode = "401", description = "권한 없음")
     })
     @DeleteMapping("/{feedId}/scrap")
-    public ResponseEntity<?> unscrapFeed(@PathVariable Long feedId) {
+    public ResponseEntity<?> unscrapFeed(
+            @PathVariable(required = false) Long feedId,
+            @RequestParam(required = false) Long stageId,
+            @RequestParam(required = false) Long scrappedUserId) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
@@ -287,7 +309,23 @@ public class FeedController {
             User currentUser = userRepository.findByUsername(username)
                     .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
 
-            Map<String, Object> response = scrapService.unscrapFeed(feedId, currentUser);
+            if ((feedId != null && (stageId != null || scrappedUserId != null)) ||
+                    (stageId != null && (feedId != null || scrappedUserId != null)) ||
+                    (scrappedUserId != null && (feedId != null || stageId != null))) {
+                throw new BadRequestException("feedId, stageId, scrappedUserId 중 하나만 설정해야 합니다.");
+            }
+
+            Feed feed = (feedId != null) ? feedRepository.findById(feedId).orElse(null) : null;
+
+            Stage stage = null;
+            if (stageId != null) {
+                stage = new Stage();
+                stage.setId(stageId);
+            }
+
+            User scrappedUser = (scrappedUserId != null) ? userRepository.findById(scrappedUserId).orElse(null) : null;
+
+            Map<String, Object> response = scrapService.unscrapFeed(feedId, currentUser, stage, scrappedUser);
             return ResponseEntity.ok(response);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

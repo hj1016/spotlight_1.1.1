@@ -45,12 +45,10 @@ public class User {
     private String profileImage;
 
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
     @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_date", nullable = false)
     private LocalDateTime updatedDate;
 

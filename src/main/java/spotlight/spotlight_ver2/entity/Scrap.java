@@ -15,15 +15,15 @@ public class Scrap {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "feed_id", nullable = false)
+    @JoinColumn(name = "feed_id", nullable = true)
     private Feed feed;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stage_id")
+    @JoinColumn(name = "stage_id", nullable = true)
     private Stage stageId;
 
     @ManyToOne
-    @JoinColumn(name = "scrapped_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "scrapped_user_id", referencedColumnName = "id", nullable = true)
     private User scrappedUser;
 
     public Long getScrapId() {

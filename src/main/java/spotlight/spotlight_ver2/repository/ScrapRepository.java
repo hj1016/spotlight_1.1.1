@@ -1,16 +1,24 @@
 package spotlight.spotlight_ver2.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import spotlight.spotlight_ver2.entity.Feed;
-import spotlight.spotlight_ver2.entity.Scrap;
-import spotlight.spotlight_ver2.entity.Student;
-import spotlight.spotlight_ver2.entity.User;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import spotlight.spotlight_ver2.entity.*;
 
 import java.util.Optional;
 
 public interface ScrapRepository extends JpaRepository<Scrap, Long> {
     boolean existsByUserAndFeed(User user, Feed feed);
+
     Optional<Scrap> findByUserAndFeed(User user, Feed feed);
+
     boolean existsByUserAndScrappedUser(User user, Student scrappedUser);
-    Optional<Scrap> findByUserAndScrappedUser(User user, Student scrappedUser);
+
+    // 사용자와 단계(Stage)를 기준으로 스크랩을 찾는 메서드
+    @Query("SELECT s FROM Scrap s WHERE s.user = :user AND s.stageId = :stage")
+    Optional<Scrap> findByUserAndStageId(@Param("user") User user, @Param("stage") Stage stage);
+
+    // 사용자와 스크랩된 사용자를 기준으로 스크랩을 찾는 메서드
+    @Query("SELECT s FROM Scrap s WHERE s.user = :user AND s.scrappedUser = :scrappedUser")
+    Optional<Scrap> findByUserAndScrappedUser(@Param("user") User user, @Param("scrappedUser") User scrappedUser);
 }
