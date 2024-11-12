@@ -88,34 +88,4 @@ public class ProjectService {
                 "프로젝트 '" + projectRole.getProject().getName() + "'에 대한 초대가 수락되었습니다."
         );
     }
-
-    // 키워드를 기반으로 프로젝트를 검색
-    public List<Project> searchProjectsByKeyword(String keyword) {
-        List<Feed> feeds = feedRepository.findByTitleContainingOrContentContaining(keyword, keyword);
-        return feeds.stream()
-                .map(Feed::getProject) // Feed에서 Project 정보 추출
-                .distinct() // 중복 제거
-                .limit(3) // 일단 3개만 추천
-                .collect(Collectors.toList());
-    }
-
-    // 특정 카테고리에 속하는 상위 3개의 프로젝트 검색
-    public List<Project> searchProjectsByCategory(Category category) {
-        List<Feed> feeds = feedRepository.findByCategory(category);
-        return feeds.stream()
-                .map(Feed::getProject) // Feed에서 Project 정보 추출
-                .distinct()
-                .limit(3)  // 상위 3개로 제한
-                .collect(Collectors.toList());
-    }
-
-    // 특정 해시태그가 포함된 프로젝트 검색
-    public List<Project> searchProjectsByHashtag(String hashtag) {
-        List<Feed> feeds = feedRepository.findByHashtagsHashtag(hashtag);
-        return feeds.stream()
-                .map(Feed::getProject)
-                .distinct()
-                .limit(3)
-                .collect(Collectors.toList());
-    }
 }

@@ -29,15 +29,10 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
             "WHERE h.id = :hashtagId")
     List<Feed> findFeedsByHashtagIdWithRelations(@Param("hashtagId") Long hashtagId);
 
-    // 제목이나 내용에 특정 키워드가 포함된 Feed 검색
-    List<Feed> findByTitleContainingOrContentContaining(String title, String content);
-
-    // 특정 카테고리에 속하는 Feed 검색
+    // 챗봇 검색
+    @Query("SELECT f FROM Feed f WHERE f.title LIKE %:keyword% OR f.content LIKE %:keyword%")
+    List<Feed> findByTitleContainingOrContentContaining(@Param("keyword") String keyword);
+    List<Feed> findByHashtagsHashtag(List<String> hashtag);
     List<Feed> findByCategory(Category category);
-
-    // 특정 해시태그가 포함된 Feed 검색
-    List<Feed> findByHashtagsHashtag(String hashtag);
-
-    // 학생이 참여한 가장 최근의 Feed를 가져오는 메서드
     Optional<Feed> findTopByUserOrderByCreatedDateDesc(User user);
 }

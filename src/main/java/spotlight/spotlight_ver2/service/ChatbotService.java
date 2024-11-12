@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import spotlight.spotlight_ver2.entity.*;
-import spotlight.spotlight_ver2.exception.NotFoundException;
+import spotlight.spotlight_ver2.entity.Feed;  // 'Project' 대신 'Feed'로 변경
+import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.exception.UnauthorizedException;
 import spotlight.spotlight_ver2.repository.CategoryRepository;
 import spotlight.spotlight_ver2.request.ChatbotRequest;
@@ -25,14 +25,14 @@ public class ChatbotService {
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
 
     private final CategoryRepository categoryRepository;
-    private final ProjectService projectService;
     private final RecommendationService recommendationService;
+    private final FeedService feedService;
 
-    public ChatbotService(ProjectService projectService, RecommendationService recommendationService, RestTemplate restTemplate, CategoryRepository categoryRepository) {
-        this.projectService = projectService;
+    public ChatbotService(RecommendationService recommendationService, RestTemplate restTemplate, CategoryRepository categoryRepository, FeedService feedService) {
         this.recommendationService = recommendationService;
         this.restTemplate = restTemplate;
         this.categoryRepository = categoryRepository;
+        this.feedService = feedService;
 
         Dotenv dotenv = Dotenv.configure().load();
         this.apiKey = dotenv.get("CHATGPT_SECRET_KEY");
@@ -59,54 +59,58 @@ public class ChatbotService {
         }
     }
 
-    public String getRecommendations(String userField, String userInput) {
-        if (userField != null && !userField.isEmpty()) {
-            // userField (String)를 기반으로 Category 객체 조회
-            Category category = categoryRepository.findByName(userField)
-                    .orElseThrow(() -> new NotFoundException("해당 이름의 카테고리를 찾을 수 없습니다: " + userField));
+    public String getRecommendations(String userField, String keyword, List<String> hashtag, String category) {
+        System.out.println("getRecommendations 호출 - 키워드: " + keyword + ", 해시태그: " + hashtag + ", 카테고리: " + category);
 
-            // 해당 카테고리에 맞는 학생 추천
-            List<User> users = recommendationService.recommendUsersByCategory(category);
-
-            if (users.isEmpty()) {
-                return "해당 카테고리에 맞는 학생을 찾을 수 없습니다.";
-            }
-
-            return formatStudentRecommendations(users);
-
-        } else if (userInput != null && !userInput.isEmpty()) {
-            // 키워드 기반 학생 추천
-            List<User> students = recommendationService.recommendUsersByKeyword(userInput);
-
+        // 1) 키워드만 존재하는 경우
+        if (!keyword.isEmpty()) {
+            List<User> students = recommendationService.recommendUsersByKeyword(keyword);
             if (!students.isEmpty()) {
-                return formatStudentRecommendations(students);
+                return formatStudentRecommendations(students);  // 추천된 학생 목록을 포맷하여 반환
             }
 
-            // 키워드 기반 프로젝트 추천
-            List<Project> projects = projectService.searchProjectsByKeyword(userInput);
-
-            if (!projects.isEmpty()) {
-                return formatProjectRecommendations(projects);
+            List<Feed> feeds = recommendationService.searchFeedsByKeyword(keyword);
+            if (!feeds.isEmpty()) {
+                return formatFeedRecommendations(feeds);  // 추천된 피드 목록을 포맷하여 반환
             }
 
-            // 키워드로 학생과 프로젝트 둘 다 추천 결과가 없는 경우
-            return "키워드에 맞는 학생이나 프로젝트를 찾을 수 없습니다.";
-        } else {
-            return "추천을 위해 카테고리 또는 키워드를 입력해주세요.";
+            return "키워드에 맞는 인재나 프로젝트를 찾을 수 없습니다.";  // 키워드만으로 추천할 수 없을 때
         }
+
+        // 2) 해시태그만 존재하는 경우
+        if (!hashtag.isEmpty()) {
+
+            List<Feed> feeds = recommendationService.searchFeedsByHashtag(hashtag);
+            if (!feeds.isEmpty()) {
+                return formatFeedRecommendations(feeds);  // 추천된 피드 목록을 포맷하여 반환
+            }
+
+            return "해시태그에 맞는 프로젝트를 찾을 수 없습니다.";  // 해시태그만으로 추천할 수 없을 때
+        }
+
+        // 3) 카테고리 기반 추천
+        if (!category.isEmpty()) {
+            List<User> students = recommendationService.recommendUsersByCategory(category);
+            if (!students.isEmpty()) {
+                return formatStudentRecommendations(students);  // 추천된 학생 목록을 포맷하여 반환
+            }
+
+            return "카테고리에 맞는 인재를 찾을 수 없습니다.";  // 카테고리만으로 추천할 수 없을 때
+        }
+
+        // 4) 키워드, 해시태그, 카테고리 모두 없는 경우
+        return "추천을 위해 키워드, 해시태그, 또는 카테고리를 입력해주세요.";  // 모든 입력이 없을 때
     }
 
-    private String formatStudentRecommendations(List<User> users) {
+    public String formatStudentRecommendations(List<User> users) {
         StringBuilder response = new StringBuilder("추천 인재 목록:\n");
         users.forEach(user -> response.append("- ").append(user.getName()).append("\n"));
         return response.toString();
     }
 
-    private String formatProjectRecommendations(List<Project> projects) {
-        StringBuilder response = new StringBuilder("추천 프로젝트 목록:\n");
-        for (Project project : projects) {
-            response.append("- ").append(project.getName()).append("\n");
-        }
+    public String formatFeedRecommendations(List<Feed> feeds) {
+        StringBuilder response = new StringBuilder("추천 피드 목록:\n");
+        feeds.forEach(feed -> response.append("- ").append(feed.getTitle()).append("\n"));
         return response.toString();
     }
 }

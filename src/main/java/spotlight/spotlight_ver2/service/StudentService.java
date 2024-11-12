@@ -20,8 +20,8 @@ public class StudentService {
     }
 
     // 학생의 분야를 결정하는 메서드
-    public Optional<Category> determineStudentField(Student student) {
-        // Student 객체의 User를 사용하여 가장 최근의 Feed 조회
+    public Optional<Category> findMostRecentFeedCategory(Student student) {
+        // Student의 최근 Feed 조회
         Optional<Feed> recentFeed = feedRepository.findTopByUserOrderByCreatedDateDesc(student.getUser());
         return recentFeed.map(Feed::getCategory); // Feed가 존재하면 Category 반환
     }
