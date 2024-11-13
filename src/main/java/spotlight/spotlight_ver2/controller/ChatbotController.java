@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.FeedRecommendationDTO;
 import spotlight.spotlight_ver2.dto.StudentRecommendationDTO;
-import spotlight.spotlight_ver2.entity.Feed;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.entity.Category;
 import spotlight.spotlight_ver2.repository.UserRepository;
@@ -83,7 +82,7 @@ public class ChatbotController {
                                 String feedCategory = studentService.findMostRecentFeedCategory(student.getStudent())
                                         .map(Category::getName)
                                         .orElse("카테고리 없음");
-                                return new StudentRecommendationDTO(student.getName(), feedCategory);
+                                return new StudentRecommendationDTO(student.getUsername(), student.getName(), feedCategory);
                             })
                             .collect(Collectors.toList());
                     break;
@@ -94,7 +93,7 @@ public class ChatbotController {
                                 String feedCategory = studentService.findMostRecentFeedCategory(student.getStudent())
                                         .map(Category::getName)
                                         .orElse("카테고리 없음");
-                                return new StudentRecommendationDTO(student.getName(), feedCategory);
+                                return new StudentRecommendationDTO(student.getUsername(), student.getName(), feedCategory);
                             })
                             .collect(Collectors.toList());
                     break;
