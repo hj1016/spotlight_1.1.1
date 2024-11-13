@@ -9,7 +9,9 @@ import spotlight.spotlight_ver2.repository.CategoryRepository;
 import spotlight.spotlight_ver2.repository.FeedRepository;
 import spotlight.spotlight_ver2.repository.UserRepository;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RecommendationService {
@@ -49,13 +51,20 @@ public class RecommendationService {
     // 2. 피드 추천
     // 1) 피드 제목 또는 내용에 키워드가 포함된 피드를 찾기
     public List<Feed> searchFeedsByKeyword(String keyword) {
-        return feedRepository.findByTitleContainingOrContentContaining(keyword);
+        return feedRepository.findByTitleContainingOrContentContaining(keyword)
+                .stream()
+                .sorted(Comparator.comparing(Feed::getCreatedDate).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
     // 2) 해시태그를 기준으로 피드 추천
     public List<Feed> searchFeedsByHashtag(List<String> hashtag) {
-        // 해당 해시태그가 포함된 피드를 찾기
-        return feedRepository.findByHashtagsHashtag(hashtag);
+        return feedRepository.findByHashtagsHashtag(hashtag)
+                .stream()
+                .sorted(Comparator.comparing(Feed::getCreatedDate).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
 }
