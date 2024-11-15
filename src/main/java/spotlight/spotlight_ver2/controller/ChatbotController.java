@@ -14,10 +14,7 @@ import spotlight.spotlight_ver2.response.ErrorResponse;
 import spotlight.spotlight_ver2.service.*;
 import spotlight.spotlight_ver2.exception.NotFoundException;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,39 +40,21 @@ public class ChatbotController {
     @PostMapping("/ask")
     public ResponseEntity<?> askChatbot(@RequestBody String userInput) {
         try {
+            // 인증된 사용자 확인
             User user = userService.getCurrentUser();
             if (user == null) {
                 throw new NotFoundException("현재 인증된 사용자가 없습니다.");
             }
 
-            String userRole = String.valueOf(user.getRole());
-            String category = "";
-
-            if ("STUDENT".equals(userRole)) {
-                category = studentService.findMostRecentFeedCategory(user.getStudent())
-                        .map(Category::getName)
-                        .orElse("");
-            }
-
-            String intent = intentService.determineIntent(userInput);
-            String keyword = intentService.extractKeyword(userInput);
-            List<String> hashtag = intentService.extractAllHashtags(userInput);
+            // 입력에서 의도 및 관련 데이터 추출
+            Map<String, String> intentDetails = intentService.extractIntentDetails(userInput);
+            String intent = intentService.determineIntent(intentDetails, userInput);
             List<?> recommendations;
 
             switch (intent) {
-                case "keyword_recommendation":
-                    recommendations = recommendationService.searchFeedsByKeyword(keyword)
-                            .stream()
-                            .map(feed -> new FeedRecommendationDTO(feed.getFeedId(), feed.getTitle(), feed.getThumbnailImage()))
-                            .collect(Collectors.toList());
-                    break;
-                case "hashtag_recommendation":
-                    recommendations = recommendationService.searchFeedsByHashtag(hashtag)
-                            .stream()
-                            .map(feed -> new FeedRecommendationDTO(feed.getFeedId(), feed.getTitle(), feed.getThumbnailImage()))
-                            .collect(Collectors.toList());
-                    break;
                 case "category_recommendation":
+                    // 카테고리 추천
+                    String category = intentDetails.get("category");
                     recommendations = recommendationService.recommendUsersByCategory(category)
                             .stream()
                             .map(student -> {
@@ -86,7 +65,28 @@ public class ChatbotController {
                             })
                             .collect(Collectors.toList());
                     break;
+
+                case "keyword_recommendation":
+                    // 키워드 기반 피드 추천
+                    String keyword = intentDetails.get("keyword");
+                    recommendations = recommendationService.searchFeedsByKeyword(keyword)
+                            .stream()
+                            .map(feed -> new FeedRecommendationDTO(feed.getFeedId(), feed.getTitle(), feed.getThumbnailImage()))
+                            .collect(Collectors.toList());
+                    break;
+
+                case "hashtag_recommendation":
+                    // 해시태그 기반 피드 추천
+                    List<String> hashtags = List.of(intentDetails.get("hashtags").split(","));
+                    recommendations = recommendationService.searchFeedsByHashtag(hashtags)
+                            .stream()
+                            .map(feed -> new FeedRecommendationDTO(feed.getFeedId(), feed.getTitle(), feed.getThumbnailImage()))
+                            .collect(Collectors.toList());
+                    break;
+
                 case "keyword_for_student_recommendation":
+                    // 키워드 기반 인재 추천
+                    keyword = intentDetails.get("keyword");
                     recommendations = recommendationService.recommendUsersByKeyword(keyword)
                             .stream()
                             .map(student -> {
@@ -97,6 +97,7 @@ public class ChatbotController {
                             })
                             .collect(Collectors.toList());
                     break;
+
                 default:
                     recommendations = List.of("추천을 위해 키워드, 해시태그, 또는 카테고리를 입력해주세요.");
             }

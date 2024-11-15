@@ -14,7 +14,9 @@ import spotlight.spotlight_ver2.exception.UnauthorizedException;
 import spotlight.spotlight_ver2.repository.CategoryRepository;
 import spotlight.spotlight_ver2.request.ChatbotRequest;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatbotService {
@@ -59,47 +61,74 @@ public class ChatbotService {
         }
     }
 
-    public String getRecommendations(String userField, String keyword, List<String> hashtag, String category) {
-        System.out.println("getRecommendations 호출 - 키워드: " + keyword + ", 해시태그: " + hashtag + ", 카테고리: " + category);
+    public String getRecommendations(String userField, String keyword, List<String> hashtags, String category) {
+        System.out.println("getRecommendations 호출 - 키워드: " + keyword + ", 해시태그: " + hashtags + ", 카테고리: " + category);
 
-        // 1) 키워드만 존재하는 경우
+        // 최종 추천 결과 저장
+        List<Feed> combinedFeeds = new ArrayList<>();
+        List<User> students = new ArrayList<>();
+
+        // 1) 키워드와 해시태그 모두 있는 경우
+        if (!keyword.isEmpty() && !hashtags.isEmpty()) {
+            // 키워드 기반 피드 검색
+            List<Feed> keywordFeeds = recommendationService.searchFeedsByKeyword(keyword);
+            // 해시태그 기반 피드 검색 (키워드 결과 제외)
+            List<Feed> hashtagFeeds = recommendationService.searchFeedsByHashtag(hashtags)
+                    .stream()
+                    .filter(feed -> !keywordFeeds.contains(feed)) // 중복 제거
+                    .collect(Collectors.toList());
+
+            combinedFeeds.addAll(keywordFeeds);
+            combinedFeeds.addAll(hashtagFeeds);
+
+            if (!combinedFeeds.isEmpty()) {
+                return formatFeedRecommendations(combinedFeeds); // 병합된 피드 추천 결과 반환
+            }
+
+            return "키워드와 해시태그에 맞는 프로젝트를 찾을 수 없습니다.";
+        }
+
+        // 2) 키워드만 존재하는 경우
         if (!keyword.isEmpty()) {
-            List<User> students = recommendationService.recommendUsersByKeyword(keyword);
+            // 키워드 기반 인재 추천
+            students = recommendationService.recommendUsersByKeyword(keyword);
             if (!students.isEmpty()) {
-                return formatStudentRecommendations(students);  // 추천된 학생 목록을 포맷하여 반환
+                return formatStudentRecommendations(students); // 추천된 학생 목록 반환
             }
 
-            List<Feed> feeds = recommendationService.searchFeedsByKeyword(keyword);
-            if (!feeds.isEmpty()) {
-                return formatFeedRecommendations(feeds);  // 추천된 피드 목록을 포맷하여 반환
+            // 키워드 기반 피드 추천
+            combinedFeeds = recommendationService.searchFeedsByKeyword(keyword);
+            if (!combinedFeeds.isEmpty()) {
+                return formatFeedRecommendations(combinedFeeds); // 추천된 피드 목록 반환
             }
 
-            return "키워드에 맞는 인재나 프로젝트를 찾을 수 없습니다.";  // 키워드만으로 추천할 수 없을 때
+            return "키워드에 맞는 인재나 프로젝트를 찾을 수 없습니다.";
         }
 
-        // 2) 해시태그만 존재하는 경우
-        if (!hashtag.isEmpty()) {
-
-            List<Feed> feeds = recommendationService.searchFeedsByHashtag(hashtag);
-            if (!feeds.isEmpty()) {
-                return formatFeedRecommendations(feeds);  // 추천된 피드 목록을 포맷하여 반환
+        // 3) 해시태그만 존재하는 경우
+        if (!hashtags.isEmpty()) {
+            // 해시태그 기반 피드 추천
+            combinedFeeds = recommendationService.searchFeedsByHashtag(hashtags);
+            if (!combinedFeeds.isEmpty()) {
+                return formatFeedRecommendations(combinedFeeds); // 추천된 피드 목록 반환
             }
 
-            return "해시태그에 맞는 프로젝트를 찾을 수 없습니다.";  // 해시태그만으로 추천할 수 없을 때
+            return "해시태그에 맞는 프로젝트를 찾을 수 없습니다.";
         }
 
-        // 3) 카테고리 기반 추천
+        // 4) 카테고리 기반 추천
         if (!category.isEmpty()) {
-            List<User> students = recommendationService.recommendUsersByCategory(category);
+            // 카테고리 기반 인재 추천
+            students = recommendationService.recommendUsersByCategory(category);
             if (!students.isEmpty()) {
-                return formatStudentRecommendations(students);  // 추천된 학생 목록을 포맷하여 반환
+                return formatStudentRecommendations(students); // 추천된 학생 목록 반환
             }
 
-            return "카테고리에 맞는 인재를 찾을 수 없습니다.";  // 카테고리만으로 추천할 수 없을 때
+            return "카테고리에 맞는 인재를 찾을 수 없습니다.";
         }
 
-        // 4) 키워드, 해시태그, 카테고리 모두 없는 경우
-        return "추천을 위해 키워드, 해시태그, 또는 카테고리를 입력해주세요.";  // 모든 입력이 없을 때
+        // 5) 키워드, 해시태그, 카테고리 모두 없는 경우
+        return "추천을 위해 키워드, 해시태그, 또는 카테고리를 입력해주세요.";
     }
 
     public String formatStudentRecommendations(List<User> users) {
