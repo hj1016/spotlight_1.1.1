@@ -32,7 +32,8 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     // 챗봇 검색
     @Query("SELECT f FROM Feed f WHERE f.title LIKE %:keyword% OR f.content LIKE %:keyword%")
     List<Feed> findByTitleContainingOrContentContaining(@Param("keyword") String keyword);
-    List<Feed> findByHashtagsHashtag(List<String> hashtag);
+    @Query("SELECT f FROM Feed f JOIN f.hashtags h WHERE h.hashtag IN :hashtags")
+    List<Feed> findByHashtagsHashtag(@Param("hashtags") List<String> hashtags);
     List<Feed> findByCategory(Category category);
     Optional<Feed> findTopByUserOrderByCreatedDateDesc(User user);
 }

@@ -66,5 +66,4 @@ public class RecommendationService {
                 .limit(5)
                 .collect(Collectors.toList());
     }
-
 }

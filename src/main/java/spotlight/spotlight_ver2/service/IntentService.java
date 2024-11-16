@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class IntentService {
@@ -18,41 +19,39 @@ public class IntentService {
         String keyword = intentDetails.get("keyword");
         String hashtags = intentDetails.get("hashtags");
 
-        // 1. 사용자 입력에 "카테고리", "분야" 라는 단어가 포함된 경우 → 카테고리 추천
+        /*
+        System.out.println("Extracted hashtags: " + hashtags);
+        System.out.println("Extracted category: " + category);
+        System.out.println("Extracted keyword: " + keyword);
+         */
+
+        if (!hashtags.isEmpty() && (userInput.contains("#") || userInput.contains("해시태그") || userInput.contains("태그"))) {
+            return "hashtag_recommendation";
+        }
+
         if (userInput.contains("카테고리") || userInput.contains("분야")) {
             if (!category.isEmpty()) {
                 return "category_recommendation";
             }
         }
 
-        // 2. 키워드와 "인재" 또는 "학생" 언급된 경우 → keyword_for_student_recommendation
         if (!keyword.isEmpty() && (userInput.contains("인재") || userInput.contains("학생"))) {
             return "keyword_for_student_recommendation";
         }
 
-        // 3. "#" 또는 "태그", "해시태그" 포함된 경우 → hashtag_recommendation
-        if (!hashtags.isEmpty() &&
-                (userInput.contains("#") || userInput.contains("태그") || userInput.contains("해시태그"))) {
-            return "hashtag_recommendation";
-        }
-
-        // 4. "프로젝트", "졸업 작품" 포함된 경우 → keyword_recommendation
-        if (!keyword.isEmpty() &&
-                (userInput.contains("프로젝트") || userInput.contains("졸업작품") || userInput.contains("졸업 작품"))) {
+        if (!keyword.isEmpty() && (userInput.contains("프로젝트") || userInput.contains("졸업작품") || userInput.contains("졸업 작품"))) {
             return "keyword_recommendation";
         }
 
-        // 5. 카테고리가 추출되었을 경우
         if (!category.isEmpty()) {
             return "category_recommendation";
         }
 
-        // 6. 키워드가 추출되었을 경우
         if (!keyword.isEmpty()) {
             return "keyword_recommendation";
         }
 
-        return "unknown"; // 아무것도 매칭되지 않을 경우
+        return "unknown";
     }
 
     private static final List<String> CATEGORIES = List.of(
@@ -69,13 +68,19 @@ public class IntentService {
     public Map<String, String> extractIntentDetails(String userInput) {
         String category = extractCategory(userInput);
         String keyword = extractKeyword(userInput);
-        List<String> hashtags = extractAllHashtags(userInput);
+        List<String> hashtagsList = extractAllHashtags(userInput);
+
+        // 빈 해시태그 제거
+        List<String> filteredHashtags = hashtagsList.stream()
+                .filter(tag -> !tag.isBlank()) // 공백 또는 빈 값 제거
+                .collect(Collectors.toList());
 
         Map<String, String> details = new HashMap<>();
-        details.put("category", category); // 추출된 카테고리
-        details.put("keyword", keyword);   // 추출된 키워드
-        details.put("hashtags", String.join(",", hashtags)); // 해시태그 목록 (필요 시)
+        details.put("category", category);
+        details.put("keyword", keyword);
+        details.put("hashtags", String.join(",", filteredHashtags));
 
+        System.out.println("Filtered and joined hashtags: " + details.get("hashtags"));
         return details;
     }
 
@@ -101,14 +106,19 @@ public class IntentService {
 
     public List<String> extractAllHashtags(String userInput) {
         List<String> hashtags = new ArrayList<>();
-        Pattern pattern = Pattern.compile("#(\\w+)");
+        Pattern pattern = Pattern.compile("#[\\w가-힣]+");
         Matcher matcher = pattern.matcher(userInput);
+
         while (matcher.find()) {
-            hashtags.add(matcher.group(1)
-                    .replaceAll("[^a-zA-Z0-9가-힣]", "")
-                    .replaceAll("(을|를|이|가|은|는)?$", ""));
+            String hashtag = matcher.group().trim();
+            hashtags.add(hashtag);
         }
+
+        // 빈 값 및 잘못된 값 필터링
+        hashtags = hashtags.stream()
+                .filter(tag -> !tag.isBlank())
+                .collect(Collectors.toList());
+
         return hashtags;
     }
-
 }

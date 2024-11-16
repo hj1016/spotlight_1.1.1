@@ -49,6 +49,13 @@ public class ChatbotController {
             // 입력에서 의도 및 관련 데이터 추출
             Map<String, String> intentDetails = intentService.extractIntentDetails(userInput);
             String intent = intentService.determineIntent(intentDetails, userInput);
+
+            /*
+            System.out.println("Determined intent: " + intent);
+
+            logger.debug("Intent determined: {}", intent);
+            logger.debug("Extracted intent details: {}", intentDetails);
+             */
             List<?> recommendations;
 
             switch (intent) {
@@ -76,12 +83,27 @@ public class ChatbotController {
                     break;
 
                 case "hashtag_recommendation":
-                    // 해시태그 기반 피드 추천
-                    List<String> hashtags = List.of(intentDetails.get("hashtags").split(","));
+                    List<String> hashtags = Arrays.stream(intentDetails.get("hashtags").split(","))
+                            .map(String::trim)
+                            .filter(tag -> !tag.isBlank())
+                            .collect(Collectors.toList());
+
+
+                    if (hashtags.isEmpty()) {
+                        recommendations = List.of("해시태그를 입력해주세요.");
+                        break;
+                    }
+
+                    // 모든 해시태그가 포함된 피드 검색
                     recommendations = recommendationService.searchFeedsByHashtag(hashtags)
                             .stream()
                             .map(feed -> new FeedRecommendationDTO(feed.getFeedId(), feed.getTitle(), feed.getThumbnailImage()))
                             .collect(Collectors.toList());
+
+                    if (recommendations.isEmpty()) {
+                        recommendations = List.of("모든 해시태그가 포함된 프로젝트를 찾을 수 없습니다.");
+                    }
+
                     break;
 
                 case "keyword_for_student_recommendation":
