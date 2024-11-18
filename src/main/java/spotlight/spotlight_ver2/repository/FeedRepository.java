@@ -36,4 +36,29 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     List<Feed> findByHashtagsHashtag(@Param("hashtags") List<String> hashtags);
     List<Feed> findByCategory(Category category);
     Optional<Feed> findTopByUserOrderByCreatedDateDesc(User user);
+
+    // 학교와 학과로 검색
+    @Query("SELECT f FROM Feed f " +
+            "JOIN f.user u " +
+            "JOIN Student s ON u.id = s.userId " +
+            "WHERE s.school = :school AND s.major = :major")
+    List<Feed> findFeedsBySchoolAndMajor(@Param("school") String school,
+                                         @Param("major") String major);
+
+    // 학교로 검색
+    @Query("SELECT f FROM Feed f " +
+            "JOIN f.user u " +
+            "JOIN Student s ON u.id = s.userId " +
+            "WHERE s.school = :school")
+    List<Feed> findFeedsBySchool(@Param("school") String school);
+
+    // 학과로 검색
+    @Query("SELECT f FROM Feed f " +
+            "JOIN f.user u " +
+            "JOIN Student s ON u.id = s.userId " +
+            "WHERE s.major = :major")
+    List<Feed> findFeedsByMajor(@Param("major") String major);
+
+    @Query("SELECT f FROM Feed f WHERE f.user.id IN :userIds")
+    List<Feed> findByStudentIdIn(@Param("userIds") List<Long> userIds);
 }

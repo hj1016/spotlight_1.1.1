@@ -58,6 +58,7 @@ public interface FeedMapper {
     default FeedDTO.FeedUserDTO mapUserToFeedUserDTO(User user) {
         if (user == null) return null;
         FeedDTO.FeedUserDTO userDTO = new FeedDTO.FeedUserDTO();
+        userDTO.setId(user.getId());
         userDTO.setName(user.getName());
         return userDTO;
     }
