@@ -8,6 +8,7 @@ build/
 ### 환경 변수 ###
 .env
 /src/main/resources/application.properties
+/src/main/resources/serviceAccountKey.json
 
 ### STS ###
 .apt_generated
