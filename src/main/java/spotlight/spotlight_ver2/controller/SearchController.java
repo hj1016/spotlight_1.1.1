@@ -37,7 +37,7 @@ public class SearchController {
             @ApiResponse(responseCode = "500", description = "서버 오류 발생")
     })
     @GetMapping("/feeds")
-    public ResponseEntity<List<FeedDTO>> searchFeeds(@RequestParam String hashtag) {
+    public ResponseEntity<List<FeedDTO>> searchFeedsWithHashtag(@RequestParam String hashtag) {
         try {
             List<FeedDTO> feeds = feedService.searchFeedsByHashtag(hashtag);
             return new ResponseEntity<>(feeds, HttpStatus.OK);
@@ -51,7 +51,7 @@ public class SearchController {
     @Operation(summary = "해시태그 검색 이력", description = "사용자의 검색 기록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "검색 기록 조회 성공")
     @GetMapping("/history")
-    public ResponseEntity<List<String>> getSearchHistory() {
+    public ResponseEntity<List<String>> getHashtagSearchHistory() {
         return new ResponseEntity<>(searchHistoryService.getSearchHistory(), HttpStatus.OK);
     }
 
@@ -62,7 +62,7 @@ public class SearchController {
             @ApiResponse(responseCode = "500", description = "서버 오류 발생")
     })
     @GetMapping("/feeds/history")
-    public ResponseEntity<List<FeedDTO>> searchFeedsFromHistory(@RequestParam String searchTerm) {
+    public ResponseEntity<List<FeedDTO>> searchFeedsBySearchHistory(@RequestParam String searchTerm) {
         try {
             List<FeedDTO> feeds = feedService.searchFeedsByHashtag(searchTerm);
             return new ResponseEntity<>(feeds, HttpStatus.OK);

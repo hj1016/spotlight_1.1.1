@@ -171,7 +171,7 @@ public class FeedController {
             @ApiResponse(responseCode = "500", description = "서버 오류 발생")
     })
     @GetMapping("/search")
-    public ResponseEntity<?> searchFeeds(@RequestParam String hashtag) {
+    public ResponseEntity<?> searchFeedsByHashtag(@RequestParam String hashtag) {
         try {
             List<FeedDTO> feeds = feedService.searchFeedsByHashtag(hashtag);
             return new ResponseEntity<>(feeds, HttpStatus.OK);
@@ -188,7 +188,7 @@ public class FeedController {
             @ApiResponse(responseCode = "500", description = "서버 오류 발생")
     })
     @GetMapping("/search/history")
-    public ResponseEntity<?> getSearchHistory() {
+    public ResponseEntity<?> getFeedSearchHistory() {
         try {
             List<String> history = searchHistoryService.getSearchHistory();
             return new ResponseEntity<>(history, HttpStatus.OK);
@@ -204,7 +204,7 @@ public class FeedController {
             @ApiResponse(responseCode = "500", description = "서버 오류 발생")
     })
     @GetMapping("/search/history/{hashtag}")
-    public ResponseEntity<?> searchByHistory(@PathVariable String hashtag) {
+    public ResponseEntity<?> searchFeedsByHistoryHashtag(@PathVariable String hashtag) {
         try {
             List<FeedDTO> feeds = feedService.searchFeedsByHashtag(hashtag);
             return new ResponseEntity<>(feeds, HttpStatus.OK);
