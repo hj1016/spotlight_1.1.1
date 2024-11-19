@@ -10,9 +10,7 @@ import spotlight.spotlight_ver2.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -268,15 +266,43 @@ public class FeedService {
         return feedHitsDTO;
     }
 
-    public List<StudentDTO> getProjectTeamMembers(Long feedId, User user) {
+    public MemberDTO getProjectTeamMemberInfo(Long feedId, Long userId, User user) {
+        // 피드 확인
         Feed feed = feedRepository.findById(feedId)
                 .orElseThrow(() -> new NotFoundException("ID가 있는 피드를 찾을 수 없습니다: " + feedId));
 
-        // feed의 팀원 목록을 가져와 StudentDTO로 변환
-        return feed.getProject().getProjectRoles().values().stream()
+        // 프로젝트 확인
+        Project project = feed.getProject();
+        if (project == null) {
+            throw new NotFoundException("피드에 연결된 프로젝트를 찾을 수 없습니다.");
+        }
+
+        // 학생 확인
+        Student student = project.getProjectRoles().values().stream()
+                .filter(role -> role.getStudent() != null && role.getStudent().getUser().getId().equals(userId))
                 .map(ProjectRole::getStudent)
-                .map(StudentMapper.INSTANCE::toDTO)
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("ID가 있는 팀원을 찾을 수 없습니다: " + userId));
+
+        // 참여한 프로젝트 정보 수집
+        List<MemberDTO.ProjectInfoDTO> projectInfoList = project.getFeeds().stream()
+                .map(f -> {
+                    ProjectRole role = project.getProjectRoles().values().stream()
+                            .filter(r -> r.getStudent().getUser().getId().equals(userId))
+                            .findFirst()
+                            .orElse(null);
+
+                    return new MemberDTO.ProjectInfoDTO(
+                            f.getTitle(),                        // 프로젝트 제목
+                            f.getThumbnailImage(),              // 썸네일 이미지
+                            f.getCategory().getName(),          // 카테고리 이름
+                            role != null ? role.getRole() : ""  // 학생의 역할
+                    );
+                })
                 .collect(Collectors.toList());
+
+        // 팀원 정보 DTO 생성
+        return new MemberDTO(student, projectInfoList);
     }
 
     public boolean existsById(Long feedId) {

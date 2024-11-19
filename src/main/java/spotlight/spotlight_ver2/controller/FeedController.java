@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.FeedDTO;
 import spotlight.spotlight_ver2.dto.FeedHitsDTO;
+import spotlight.spotlight_ver2.dto.MemberDTO;
 import spotlight.spotlight_ver2.dto.StudentDTO;
 import spotlight.spotlight_ver2.entity.Feed;
 import spotlight.spotlight_ver2.entity.Stage;
@@ -338,24 +339,25 @@ public class FeedController {
         }
     }
 
-    @Operation(summary = "프로젝트 팀원 조회", description = "특정 피드에 속한 팀원 목록을 조회합니다.")
+    @Operation(summary = "프로젝트 팀원 정보 조회", description = "특정 피드에 속한 특정 팀원의 정보를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공적으로 팀원 목록을 조회했습니다."),
-            @ApiResponse(responseCode = "404", description = "피드를 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "200", description = "성공적으로 팀원 정보를 조회했습니다."),
+            @ApiResponse(responseCode = "404", description = "피드 또는 팀원을 찾을 수 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    @GetMapping("/{feedId}/team-members")
-    public ResponseEntity<?> getProjectTeamMembers(@PathVariable Long feedId) {
+    @GetMapping("/{feedId}/team-members/{userId}")
+    public ResponseEntity<?> getProjectTeamMemberInfo(@PathVariable Long feedId, @PathVariable Long userId) {
         try {
+            // 현재 인증된 사용자 정보 가져오기
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
 
             User currentUser = userRepository.findByUsername(username)
                     .orElseThrow(() -> new NotFoundException("현재 사용자를 찾을 수 없습니다."));
 
-            // 팀원 조회
-            List<StudentDTO> teamMembers = feedService.getProjectTeamMembers(feedId, currentUser);
-            return ResponseEntity.ok(teamMembers);
+            // 특정 팀원 정보 조회
+            MemberDTO memberInfo = feedService.getProjectTeamMemberInfo(feedId, userId, currentUser);
+            return ResponseEntity.ok(memberInfo);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
