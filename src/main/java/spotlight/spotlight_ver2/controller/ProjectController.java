@@ -38,10 +38,10 @@ public class ProjectController {
     })
     @PostMapping("/{projectId}/invite")
     public ResponseEntity<ProjectRoleDTO> inviteTeamMember(@PathVariable Long projectId,
-                                                           @RequestParam Long userId,
+                                                           @RequestParam String username,
                                                            @RequestParam String role) {
         try {
-            ProjectRole projectRole = projectService.inviteTeamMember(projectId, userId, role);
+            ProjectRole projectRole = projectService.inviteTeamMember(projectId, username, role);
             ProjectRoleDTO dto = new ProjectRoleDTO(
                     projectRole.getId(),
                     projectRole.getStudent().getUser().getId(),

@@ -9,7 +9,6 @@ import spotlight.spotlight_ver2.mapper.NotificationResponseMapper;
 import spotlight.spotlight_ver2.repository.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProjectService {
@@ -17,16 +16,18 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectRoleRepository projectRoleRepository;
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
     private final FeedRepository feedRepository;
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
     private final NotificationResponseMapper notificationResponseMapper;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, ProjectRoleRepository projectRoleRepository, StudentRepository studentRepository, FeedRepository feedRepository, NotificationRepository notificationRepository, NotificationService notificationService, NotificationResponseMapper notificationResponseMapper) {
+    public ProjectService(ProjectRepository projectRepository, ProjectRoleRepository projectRoleRepository, StudentRepository studentRepository, UserRepository userRepository, FeedRepository feedRepository, NotificationRepository notificationRepository, NotificationService notificationService, NotificationResponseMapper notificationResponseMapper) {
         this.projectRepository = projectRepository;
         this.projectRoleRepository = projectRoleRepository;
         this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
         this.feedRepository = feedRepository;
         this.notificationRepository = notificationRepository;
         this.notificationService = notificationService;
@@ -38,14 +39,18 @@ public class ProjectService {
         return projectRoleRepository.findByStudentAndAcceptedFalse(student);
     }
 
-    public ProjectRole inviteTeamMember(Long projectId, Long userId, String role) {
+    public ProjectRole inviteTeamMember(Long projectId, String username, String role) {
         // 프로젝트를 ID로 조회
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("프로젝트를 찾을 수 없습니다. ID: " + projectId));
 
-        // 사용자 ID로 학생을 조회
-        Student student = studentRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("해당 사용자 ID로 학생을 찾을 수 없습니다. ID: " + userId));
+        // 사용자 이름(username)으로 User 조회
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("해당 사용자 이름으로 사용자를 찾을 수 없습니다. Username: " + username));
+
+        // User 기반으로 Student 조회
+        Student student = studentRepository.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException("해당 사용자 ID로 학생을 찾을 수 없습니다. ID: " + user.getId()));
 
         // 새로운 ProjectRole 객체 생성
         ProjectRole projectRole = new ProjectRole();
