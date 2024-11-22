@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import spotlight.spotlight_ver2.dto.ExhibitionDTO;
+import spotlight.spotlight_ver2.request.ExhibitionRequest;
 import spotlight.spotlight_ver2.response.ErrorResponse;
 import spotlight.spotlight_ver2.response.ExhibitionResponse;
 import spotlight.spotlight_ver2.exception.NotFoundException;
@@ -33,10 +33,11 @@ public class ExhibitionController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
             @ApiResponse(responseCode = "500", description = "서버 오류 발생")
     })
-    public ResponseEntity<?> createExhibition(@Parameter(description = "전시 정보를 담고 있는 DTO 객체") @RequestBody ExhibitionDTO exhibitionDTO) {
+    public ResponseEntity<?> createExhibition(
+            @Parameter(description = "전시 정보를 담고 있는 요청 객체") @RequestBody ExhibitionRequest exhibitionRequest) {
         try {
-            ExhibitionDTO createdExhibition = exhibitionService.createExhibition(exhibitionDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ExhibitionResponse(true, createdExhibition));
+            ExhibitionResponse createdExhibition = exhibitionService.createExhibition(exhibitionRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdExhibition);
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (InternalServerErrorException e) {

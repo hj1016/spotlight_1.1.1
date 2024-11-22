@@ -105,11 +105,15 @@ public class FeedDTO {
         @Schema(description = "카테고리 이름", example = "전기/전자")
         private String name;
 
+        @Schema(description = "대분류 ID", example = "5")
+        private Long parentId;
+
         public FeedCategoryDTO() {}
 
         public FeedCategoryDTO(Category category){
             this.id = category.getId();
             this.name = category.getName();
+            this.parentId = category.getParent().getId();
         }
     }
 

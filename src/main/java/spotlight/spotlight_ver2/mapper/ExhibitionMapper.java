@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
+import spotlight.spotlight_ver2.response.ExhibitionResponse;
 import spotlight.spotlight_ver2.dto.ExhibitionDTO;
 import spotlight.spotlight_ver2.entity.Exhibition;
 import spotlight.spotlight_ver2.entity.Feed;
@@ -22,6 +23,10 @@ public interface ExhibitionMapper {
     @Mapping(target = "user", source = "user", qualifiedByName = "mapUserIdToUser")
     @Mapping(target = "feed", ignore = true)
     Exhibition toEntity(ExhibitionDTO exhibitionDTO);
+
+    // Exhibition -> ExhibitionResponse
+    @Mapping(source = "user.id", target = "userId")
+    ExhibitionResponse toResponse(Exhibition exhibition);
 
     // Feed -> ExhibitionFeedDTO
     @Named("mapFeedToExhibitionFeedDTO")
