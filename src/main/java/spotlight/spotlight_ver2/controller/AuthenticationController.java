@@ -11,6 +11,7 @@ import spotlight.spotlight_ver2.request.AuthenticationRequest;
 import spotlight.spotlight_ver2.request.RefreshTokenRequest;
 import spotlight.spotlight_ver2.security.JwtUtil;
 import spotlight.spotlight_ver2.service.AuthenticationService;
+import spotlight.spotlight_ver2.response.LoginResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,12 +40,17 @@ public class AuthenticationController {
             String accessToken = authenticationService.authenticateUser(request.getUsername(), request.getPassword());
             String refreshToken = jwtUtil.generateRefreshToken(request.getUsername());
 
-            Map<String, String> response = new HashMap<>();
-            response.put("accessToken", "Bearer " + accessToken);
-            response.put("refreshToken", "Bearer " + refreshToken);
+            LoginResponse response = new LoginResponse();
+            response.setStatus(200);
+            response.setMessage("로그인 성공");
+            response.setAccessToken("Bearer " + accessToken);
+            response.setRefreshToken("Bearer " + refreshToken);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
+            LoginResponse response = new LoginResponse();
+            response.setStatus(400);
+            response.setMessage(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
