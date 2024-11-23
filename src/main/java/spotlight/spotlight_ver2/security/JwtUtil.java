@@ -21,13 +21,14 @@ public class JwtUtil {
     @Value("${jwt.refresh.expiration}")
     private long refreshExpirationTime;
 
-    // Access Token 생성
-    public String generateAccessToken(String username) {
+    // Access Token 생성 (role 정보도 포함)
+    public String generateAccessToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         return createToken(claims, username, accessExpirationTime);
     }
 
-    // Refresh Token 생성
+    // Refresh Token 생성 (role 정보는 필요없음)
     public String generateRefreshToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, username, refreshExpirationTime);
@@ -43,7 +44,7 @@ public class JwtUtil {
         }
 
         String username = extractUsername(refreshToken);
-        return generateAccessToken(username);
+        return generateAccessToken(username, "NORMAL");
     }
 
     private String createToken(Map<String, Object> claims, String subject, long expirationTime) {

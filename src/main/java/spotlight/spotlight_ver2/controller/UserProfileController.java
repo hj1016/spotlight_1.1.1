@@ -2,6 +2,7 @@ package spotlight.spotlight_ver2.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import spotlight.spotlight_ver2.dto.UserProfileDTO;
+import spotlight.spotlight_ver2.service.JwtService;
 import spotlight.spotlight_ver2.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +15,14 @@ public class UserProfileController {
 
     @Autowired
     private UserProfileService userProfileService;
+    @Autowired
+    private JwtService jwtService;
 
     // 사용자 프로필 조회
     @GetMapping
     public ResponseEntity<UserProfileDTO> getUserProfile(@RequestHeader("Authorization") String token) {
         UserProfileDTO userProfile = userProfileService.getUserProfile(token);
+        userProfile.setRole(jwtService.extractRole(token));
         return ResponseEntity.ok(userProfile);
     }
 

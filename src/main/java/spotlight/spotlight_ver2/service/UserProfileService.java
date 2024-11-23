@@ -26,6 +26,7 @@ public class UserProfileService {
         String school = user.getStudent() != null ? user.getStudent().getSchool() : null;
         String major = user.getStudent() != null ? user.getStudent().getMajor() : null;
         String company = user.getRecruiter() != null ? user.getRecruiter().getCompany() : null;
+        String role = user.getRole() != null ? user.getRole().name() : "NORMAL";
 
         return new UserProfileDTO(
                 user.getName(),
@@ -34,7 +35,8 @@ public class UserProfileService {
                 user.getProfileImage(),
                 school,
                 major,
-                company
+                company,
+                role
         );
     }
 
@@ -60,15 +62,17 @@ public class UserProfileService {
         String school = user.getStudent() != null ? user.getStudent().getSchool() : null;
         String major = user.getStudent() != null ? user.getStudent().getMajor() : null;
         String company = user.getRecruiter() != null ? user.getRecruiter().getCompany() : null;
+        String role = user.getRole() != null ? user.getRole().name() : "NORMAL";
 
         return new UserProfileDTO(
                 user.getName(),
                 user.getUsername(),
-                "********", // 비밀번호는 표시하지 않음
+                "********",
                 user.getProfileImage(),
                 school,
                 major,
-                company
+                company,
+                role
         );
     }
 }

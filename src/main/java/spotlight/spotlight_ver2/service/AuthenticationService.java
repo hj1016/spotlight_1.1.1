@@ -48,7 +48,8 @@ public class AuthenticationService {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent() && passwordEncoder.matches(password, userOptional.get().getPassword())) {
             User user = userOptional.get();
-            String token = jwtTokenProvider.generateAccessToken(user.getUsername());
+            String role = user.getRole().toString();
+            String token = jwtTokenProvider.generateAccessToken(user.getUsername(), role);
             return token;
         } else {
             throw new IllegalArgumentException("아이디 또는 비밀번호가 잘못되었습니다.");

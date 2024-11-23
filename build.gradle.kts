@@ -31,6 +31,7 @@ dependencies {
     implementation ("org.glassfish.jaxb:jaxb-runtime:2.3.1")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation ("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.json:json:20231013")
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")

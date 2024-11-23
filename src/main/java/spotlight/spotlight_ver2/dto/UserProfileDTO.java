@@ -8,11 +8,12 @@ public class UserProfileDTO {
     private String school;
     private String major;
     private String company;
+    private String Role;
 
     public UserProfileDTO() {}
 
     public UserProfileDTO(String name, String username, String password, String profileImageUrl,
-                          String school, String major, String company) {
+                          String school, String major, String company, String Role) {
         this.name = name;
         this.username = username;
         this.password = password;
@@ -20,6 +21,7 @@ public class UserProfileDTO {
         this.school = school;
         this.major = major;
         this.company = company;
+        this.Role = Role;
     }
 
     public String getName() {
@@ -76,5 +78,13 @@ public class UserProfileDTO {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    public String getRole() {
+        return Role;
+    }
+
+    public void setRole(String role) {
+        Role = role;
     }
 }
