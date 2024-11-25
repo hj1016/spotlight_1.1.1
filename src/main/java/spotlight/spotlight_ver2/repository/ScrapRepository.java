@@ -21,4 +21,6 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
     // 사용자와 스크랩된 사용자를 기준으로 스크랩을 찾는 메서드
     @Query("SELECT s FROM Scrap s WHERE s.user = :user AND s.scrappedUser = :scrappedUser")
     Optional<Scrap> findByUserAndScrappedUser(@Param("user") User user, @Param("scrappedUser") User scrappedUser);
+
+    boolean existsByUserAndScrappedUser(User user, User scrappedUser);
 }
