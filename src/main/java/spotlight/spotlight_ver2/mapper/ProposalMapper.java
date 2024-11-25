@@ -8,9 +8,12 @@ import spotlight.spotlight_ver2.dto.ProposalDTO;
 import spotlight.spotlight_ver2.entity.Proposal;
 import spotlight.spotlight_ver2.entity.Recruiter;
 import spotlight.spotlight_ver2.entity.Student;
+import spotlight.spotlight_ver2.request.ProposalRequest;
+import spotlight.spotlight_ver2.response.ProposalResponse;
 
 @Mapper
 public interface ProposalMapper {
+
     ProposalMapper INSTANCE = Mappers.getMapper(ProposalMapper.class);
 
     // Proposal -> ProposalDTO
@@ -18,10 +21,16 @@ public interface ProposalMapper {
     @Mapping(target = "student", source = "student", qualifiedByName = "mapStudentToDTO")
     ProposalDTO toDTO(Proposal proposal);
 
-    // ProposalDTO -> Proposal
-    @Mapping(target = "recruiter", source = "recruiter", qualifiedByName = "mapDTOToRecruiter")
-    @Mapping(target = "student", source = "student", qualifiedByName = "mapDTOToStudent")
-    Proposal toEntity(ProposalDTO proposalDTO);
+    // ProposalRequest -> Proposal
+    @Mapping(target = "recruiter", ignore = true)
+    @Mapping(target = "student", ignore = true)
+    @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "proposalId", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    Proposal toEntity(ProposalRequest request);
+
+    // Proposal -> ProposalResponse
+    ProposalResponse toResponse(Proposal proposal);
 
     // Recruiter -> ProposalRecruiterDTO
     @Named("mapRecruiterToDTO")
@@ -35,17 +44,6 @@ public interface ProposalMapper {
         return recruiterDTO;
     }
 
-    // ProposalRecruiterDTO -> Recruiter
-    @Named("mapDTOToRecruiter")
-    default Recruiter mapDTOToRecruiter(ProposalDTO.ProposalRecruiterDTO recruiterDTO) {
-        Recruiter recruiter = new Recruiter();
-        recruiter.setUserId(recruiterDTO.getUserId());
-        recruiter.setCompany(recruiterDTO.getCompany());
-        recruiter.setRecruiterCertificate(recruiterDTO.getCertification());
-        // `user`는 무시
-        return recruiter;
-    }
-
     // Student -> ProposalStudentDTO
     @Named("mapStudentToDTO")
     default ProposalDTO.ProposalStudentDTO mapStudentToDTO(Student student) {
@@ -56,17 +54,5 @@ public interface ProposalMapper {
         studentDTO.setMajor(student.getMajor());
         studentDTO.setPortfolioImage(student.getPortfolioImage());
         return studentDTO;
-    }
-
-    // ProposalStudentDTO -> Student
-    @Named("mapDTOToStudent")
-    default Student mapDTOToStudent(ProposalDTO.ProposalStudentDTO studentDTO) {
-        Student student = new Student();
-        student.setUserId(studentDTO.getUserId());
-        student.setSchool(studentDTO.getSchool());
-        student.setMajor(studentDTO.getMajor());
-        student.setPortfolioImage(studentDTO.getPortfolioImage());
-        // `proposals`와 `projectRoles`는 무시
-        return student;
     }
 }

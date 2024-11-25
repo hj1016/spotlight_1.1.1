@@ -17,6 +17,8 @@ import spotlight.spotlight_ver2.exception.ForbiddenException;
 import spotlight.spotlight_ver2.exception.NotFoundException;
 import spotlight.spotlight_ver2.exception.UnauthorizedException;
 import spotlight.spotlight_ver2.repository.UserRepository;
+import spotlight.spotlight_ver2.request.ProposalRequest;
+import spotlight.spotlight_ver2.response.ProposalResponse;
 import spotlight.spotlight_ver2.service.ProposalService;
 
 @RestController
@@ -43,17 +45,15 @@ public class ProposalController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PostMapping
-    public ResponseEntity<?> createProposal(@RequestParam Long userId, @RequestBody ProposalDTO proposalDTO) {
+    public ResponseEntity<?> createProposal(@RequestBody ProposalRequest proposalRequest) {
         try {
-            Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
-            String username = currentUser.getName();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
 
-            // username으로 User 엔티티 조회
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-            ProposalDTO createdProposal = proposalService.createProposal(userId, user, proposalDTO);
-
+            ProposalResponse createdProposal = proposalService.createProposal(proposalRequest, user);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdProposal);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
@@ -78,17 +78,17 @@ public class ProposalController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @PutMapping("/{proposalId}")
-    public ResponseEntity<?> updateProposal(@PathVariable Long proposalId, @RequestBody ProposalDTO proposalDTO) {
+    public ResponseEntity<?> updateProposal(
+            @PathVariable Long proposalId,
+            @RequestBody ProposalRequest proposalRequest) {
         try {
-            Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
-            String username = currentUser.getName();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String username = authentication.getName();
 
-            // username으로 User 엔티티 조회
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
 
-            ProposalDTO updatedProposal = proposalService.updateProposal(proposalId, user, proposalDTO);
-
+            ProposalResponse updatedProposal = proposalService.updateProposal(proposalId, proposalRequest, user);
             return ResponseEntity.ok(updatedProposal);
         } catch (UnauthorizedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
