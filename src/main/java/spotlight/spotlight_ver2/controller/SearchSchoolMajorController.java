@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import spotlight.spotlight_ver2.dto.FeedDTO;
 import spotlight.spotlight_ver2.exception.BadRequestException;
 import spotlight.spotlight_ver2.exception.NotFoundException;
-import spotlight.spotlight_ver2.response.SearchResponse;
 import spotlight.spotlight_ver2.service.SearchSchoolMajorService;
 
 import java.util.List;
@@ -41,7 +40,7 @@ public class SearchSchoolMajorController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/api/search/schoolormajor")
-    public ResponseEntity<SearchResponse> searchFeedsBySchoolOrMajor(
+    public ResponseEntity<List<FeedDTO>> searchFeedsBySchoolOrMajor(
             @RequestParam(required = false) String school,
             @RequestParam(required = false) String major
     ) {
@@ -66,22 +65,18 @@ public class SearchSchoolMajorController {
             }
 
             if (results.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                        .body(new SearchResponse(true, "검색 결과가 없습니다.", null));
+                return ResponseEntity.noContent().build();
             }
 
-            return ResponseEntity.ok(new SearchResponse(true, "검색 결과입니다.", results));
+            return ResponseEntity.ok(results);
 
         } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new SearchResponse(false, e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new SearchResponse(false, e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new SearchResponse(false, "서버 오류가 발생했습니다. 나중에 다시 시도해주세요.", null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

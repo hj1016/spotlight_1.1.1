@@ -184,39 +184,6 @@ public class FeedController {
         }
     }
 
-    @Operation(summary = "해시태그 검색 이력", description = "사용자의 검색 기록을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "검색 기록 조회 성공"),
-            @ApiResponse(responseCode = "500", description = "서버 오류 발생")
-    })
-    @GetMapping("/search/history")
-    public ResponseEntity<?> getFeedSearchHistory() {
-        try {
-            List<String> history = searchHistoryService.getSearchHistory();
-            return new ResponseEntity<>(history, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @Operation(summary = "해시태그 검색 이력 기반 조회", description = "이전에 검색한 기록을 통해 피드를 검색합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "피드 검색 성공"),
-            @ApiResponse(responseCode = "404", description = "해시태그를 찾을 수 없습니다."),
-            @ApiResponse(responseCode = "500", description = "서버 오류 발생")
-    })
-    @GetMapping("/search/history/{hashtag}")
-    public ResponseEntity<?> searchFeedsByHistoryHashtag(@PathVariable String hashtag) {
-        try {
-            List<FeedDTO> feeds = feedService.searchFeedsByHashtag(hashtag);
-            return new ResponseEntity<>(feeds, HttpStatus.OK);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>("서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @Operation(summary = "피드 조회수 집계", description = "사용자별 피드 조회수를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회수 집계 성공", content = @Content(schema = @Schema(implementation = FeedHitsDTO.class))),
