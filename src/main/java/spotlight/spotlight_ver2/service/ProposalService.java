@@ -20,6 +20,8 @@ import spotlight.spotlight_ver2.request.ProposalRequest;
 import spotlight.spotlight_ver2.response.ProposalResponse;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProposalService {
@@ -28,14 +30,16 @@ public class ProposalService {
     private final StudentRepository studentRepository;
     private final RecruiterRepository recruiterRepository;
     private final NotificationService notificationService;
+    private final UserService userService;
     private final ProposalMapper proposalMapper = ProposalMapper.INSTANCE;
 
     @Autowired
-    public ProposalService(ProposalRepository proposalRepository, StudentRepository studentRepository, RecruiterRepository recruiterRepository, NotificationService notificationService) {
+    public ProposalService(ProposalRepository proposalRepository, StudentRepository studentRepository, RecruiterRepository recruiterRepository, NotificationService notificationService, UserService userService) {
         this.proposalRepository = proposalRepository;
         this.studentRepository = studentRepository;
         this.recruiterRepository = recruiterRepository;
         this.notificationService = notificationService;
+        this.userService = userService;
     }
 
     @Transactional
@@ -82,5 +86,59 @@ public class ProposalService {
 
         // Proposal -> ProposalResponse 매핑
         return proposalMapper.toResponse(updatedProposal);
+    }
+
+    // 공고 제안서 목록 조회 (학생)
+    public List<ProposalResponse> getProposalsByStudent(long id) {
+        User user = userService.getUserById(id);
+        List<Proposal> proposals = proposalRepository.findByStudent_User(user);
+
+        return proposals.stream()
+                .map(this::toProposalResponse)
+                .collect(Collectors.toList());
+    }
+
+    // 공고 제안서 목록 조회 (리크루터)
+    public List<ProposalResponse> getProposalsByRecruiter(long id) {
+        User user = userService.getUserById(id);
+        List<Proposal> proposals = proposalRepository.findByRecruiter_User(user);
+
+        return proposals.stream()
+                .map(this::toProposalResponse)
+                .collect(Collectors.toList());
+    }
+
+    // 공고 제안서 세부 내용 조회 (학생/리크루터)
+    public ProposalResponse getProposalDetails(long id, Long proposalId, boolean isStudent) {
+        Proposal proposal;
+
+        if (isStudent) {
+            proposal = proposalRepository.findByProposalIdAndStudent_UserId(proposalId, id)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 제안서가 없습니다."));
+        } else {
+            proposal = proposalRepository.findByProposalIdAndRecruiter_UserId(proposalId, id)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 제안서가 없습니다."));
+        }
+        return toProposalResponse(proposal);
+    }
+
+    private ProposalResponse toProposalResponse(Proposal proposal) {
+        ProposalResponse response = new ProposalResponse();
+        response.setProposalId(proposal.getProposalId());
+        response.setJob(proposal.getJob());
+        response.setContact(proposal.getContact());
+        response.setDescription(proposal.getDescription());
+        response.setCreatedDate(proposal.getCreatedDate().toString());
+        response.setStatus(proposal.getStatus());
+
+        ProposalDTO.ProposalRecruiterDTO recruiterDTO = new ProposalDTO.ProposalRecruiterDTO();
+        recruiterDTO.setUserId(proposal.getRecruiter().getUserId());
+        response.setRecruiter(recruiterDTO);
+
+        ProposalDTO.ProposalStudentDTO studentDTO = new ProposalDTO.ProposalStudentDTO();
+        studentDTO.setUserId(proposal.getStudent().getUserId());
+        response.setStudent(studentDTO);
+
+        return response;
     }
 }

@@ -2,6 +2,7 @@ package spotlight.spotlight_ver2.response;
 
 import lombok.Getter;
 import lombok.Setter;
+import spotlight.spotlight_ver2.dto.ProposalDTO;
 
 @Getter
 @Setter
@@ -12,6 +13,8 @@ public class ProposalResponse {
     private String description;
     private String createdDate;
     private String status;
+    private ProposalDTO.ProposalRecruiterDTO recruiter;
+    private ProposalDTO.ProposalStudentDTO student;
 
     // 기본 생성자
     public ProposalResponse() {}
@@ -63,5 +66,21 @@ public class ProposalResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public ProposalDTO.ProposalRecruiterDTO getRecruiter() {
+        return recruiter;
+    }
+
+    public void setRecruiter(ProposalDTO.ProposalRecruiterDTO recruiter) {
+        this.recruiter = recruiter;
+    }
+
+    public ProposalDTO.ProposalStudentDTO getStudent() {
+        return student;
+    }
+
+    public void setStudent(ProposalDTO.ProposalStudentDTO student) {
+        this.student = student;
     }
 }

@@ -11,7 +11,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.ProposalDTO;
+import spotlight.spotlight_ver2.entity.Proposal;
+import spotlight.spotlight_ver2.entity.Recruiter;
+import spotlight.spotlight_ver2.entity.Student;
 import spotlight.spotlight_ver2.entity.User;
+import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.BadRequestException;
 import spotlight.spotlight_ver2.exception.ForbiddenException;
 import spotlight.spotlight_ver2.exception.NotFoundException;
@@ -20,6 +24,9 @@ import spotlight.spotlight_ver2.repository.UserRepository;
 import spotlight.spotlight_ver2.request.ProposalRequest;
 import spotlight.spotlight_ver2.response.ProposalResponse;
 import spotlight.spotlight_ver2.service.ProposalService;
+import spotlight.spotlight_ver2.service.UserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/proposals")
@@ -28,11 +35,13 @@ public class ProposalController {
 
     private final ProposalService proposalService;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public ProposalController(ProposalService proposalService, UserRepository userRepository) {
+    public ProposalController(ProposalService proposalService, UserRepository userRepository, UserService userService) {
         this.proposalService = proposalService;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Operation(summary = "새 제안서 생성", description = "제공된 세부정보로 새 제안서를 생성합니다.")
@@ -101,5 +110,40 @@ public class ProposalController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
         }
+    }
+
+    // 공고 제안서 목록 조회 (학생)
+    @GetMapping("/list/student")
+    public List<ProposalResponse> getProposalsByStudent() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+        return proposalService.getProposalsByStudent(user.getId());
+    }
+
+    // 공고 제안서 목록 조회 (리크루터)
+    @GetMapping("/list/recruiter")
+    public List<ProposalResponse> getProposalsByRecruiter() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+        return proposalService.getProposalsByRecruiter(user.getId());
+    }
+
+    // 공고 제안서 세부 내용 조회
+    @GetMapping("/details")
+    public ProposalResponse getProposalDetails(@RequestParam Long proposalId,
+                                               @RequestParam boolean isStudent) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+        return proposalService.getProposalDetails(user.getId(), proposalId, isStudent);
     }
 }

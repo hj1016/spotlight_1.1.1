@@ -1,5 +1,7 @@
 package spotlight.spotlight_ver2.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class UserProfileDTO {
     private String name;
     private String username;

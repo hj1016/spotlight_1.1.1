@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import spotlight.spotlight_ver2.entity.User;
+import spotlight.spotlight_ver2.repository.UserRepository;
 import spotlight.spotlight_ver2.request.AuthenticationRequest;
 import spotlight.spotlight_ver2.request.RefreshTokenRequest;
 import spotlight.spotlight_ver2.security.JwtUtil;
@@ -15,6 +17,7 @@ import spotlight.spotlight_ver2.response.LoginResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -22,11 +25,13 @@ import java.util.Map;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Autowired
-    public AuthenticationController(AuthenticationService authenticationService, JwtUtil jwtUtil) {
+    public AuthenticationController(AuthenticationService authenticationService, JwtUtil jwtUtil, UserRepository userRepository) {
         this.authenticationService = authenticationService;
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     @Operation(summary = "로그인 요청", description = "사용자 이름과 비밀번호를 통해 사용자를 인증하고 JWT 토큰을 반환합니다.")
@@ -39,12 +44,30 @@ public class AuthenticationController {
         try {
             String accessToken = authenticationService.authenticateUser(request.getUsername(), request.getPassword());
             String refreshToken = jwtUtil.generateRefreshToken(request.getUsername());
+            String username = request.getUsername();
+            Long id = 0L;
+            String name = "";
+            String role = "";
+            String profileImage = "";
+            Optional<User> user = userRepository.findByUsername(username);
+            if (user.isPresent()) {
+                User userDetails = user.get();
+                id = userDetails.getId();
+                name = userDetails.getName();
+                role = String.valueOf(userDetails.getRole());
+                profileImage = userDetails.getProfileImage();
+            }
 
             LoginResponse response = new LoginResponse();
             response.setStatus(200);
             response.setMessage("로그인 성공");
-            response.setAccessToken("Bearer " + accessToken);
-            response.setRefreshToken("Bearer " + refreshToken);
+            response.setAccessToken(accessToken);
+            response.setRefreshToken(refreshToken);
+            response.setId(id);
+            response.setName(name);
+            response.setUsername(username);
+            response.setRole(role);
+            response.setProfileImage(profileImage);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -66,7 +89,7 @@ public class AuthenticationController {
             String newAccessToken = jwtUtil.refreshAccessToken(refreshTokenRequest.getRefreshToken());
 
             Map<String, String> response = new HashMap<>();
-            response.put("accessToken", "Bearer " + newAccessToken);
+            response.put("accessToken", newAccessToken);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {

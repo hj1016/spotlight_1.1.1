@@ -14,7 +14,9 @@ import spotlight.spotlight_ver2.service.NotificationService;
 import spotlight.spotlight_ver2.mapper.NotificationResponseMapper;
 import spotlight.spotlight_ver2.service.UserService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,10 +46,12 @@ public class NotificationController {
     public ResponseEntity<?> getNotifications() {
         try {
             User receiver = userService.getCurrentUser();
-            List<NotificationResponse> response = notificationService.getNotificationsForUser(receiver)
+            List<NotificationResponse> notifications = notificationService.getNotificationsForUser(receiver)
                     .stream()
                     .map(notificationResponseMapper::toResponse)
                     .collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("notifications", notifications);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500)
