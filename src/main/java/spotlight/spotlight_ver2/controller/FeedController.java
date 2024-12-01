@@ -7,18 +7,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
 import spotlight.spotlight_ver2.dto.FeedDTO;
 import spotlight.spotlight_ver2.dto.FeedHitsDTO;
 import spotlight.spotlight_ver2.dto.MemberDTO;
-import spotlight.spotlight_ver2.dto.StudentDTO;
-import spotlight.spotlight_ver2.entity.Feed;
-import spotlight.spotlight_ver2.entity.Stage;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.*;
@@ -163,6 +164,21 @@ public class FeedController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (InternalServerErrorException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @Operation(summary = "전체 피드 목록 조회", description = "모든 피드 데이터를 페이지 단위로 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "피드 목록 조회 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping
+    public ResponseEntity<?> getAllFeeds(Pageable pageable) {
+        try {
+            Page<FeedDTO> feedPage = feedService.getAllFeeds(pageable);
+            return ResponseEntity.ok(feedPage);
+        } catch (Exception e) {
+            return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.");
         }
     }
 

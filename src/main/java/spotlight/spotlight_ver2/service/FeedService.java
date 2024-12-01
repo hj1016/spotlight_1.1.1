@@ -7,6 +7,9 @@ import spotlight.spotlight_ver2.exception.*;
 import spotlight.spotlight_ver2.mapper.FeedMapper;
 import spotlight.spotlight_ver2.mapper.StudentMapper;
 import spotlight.spotlight_ver2.repository.*;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -155,6 +158,12 @@ public class FeedService {
 
         feedRepository.delete(feed);
     }
+
+    public Page<FeedDTO> getAllFeeds(Pageable pageable) {
+        Page<Feed> feedPage = feedRepository.findAll(pageable);
+        return feedPage.map(feedMapper::toDTO);
+    }
+
 
     private void validateFeed(Feed feed) {
         if (isNullOrEmpty(feed.getTitle())) {
