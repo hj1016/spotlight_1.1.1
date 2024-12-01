@@ -309,4 +309,10 @@ public class FeedService {
         return feedRepository.existsById(feedId);
     }
 
+    public List<FeedDTO> getFeedsByUsername(String username) {
+        List<Feed> feeds = feedRepository.findByUsername(username);
+        return feeds.stream()
+                .map(feedMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

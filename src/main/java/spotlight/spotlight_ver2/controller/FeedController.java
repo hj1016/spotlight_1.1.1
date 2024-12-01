@@ -376,4 +376,26 @@ public class FeedController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버에서 오류가 발생했습니다.");
         }
     }
+
+    @Operation(summary = "내가 작성한 피드 목록 조회", description = "현재 로그인한 사용자가 작성한 모든 피드를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "피드 목록 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/my-feeds")
+    public ResponseEntity<?> getMyFeeds() {
+        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
+        if (currentUser == null || !currentUser.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자가 인증되지 않았습니다.");
+        }
+
+        try {
+            String username = currentUser.getName();
+            List<FeedDTO> myFeeds = feedService.getFeedsByUsername(username);
+            return ResponseEntity.ok(myFeeds);
+        } catch (Exception e) {
+            return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.");
+        }
+    }
 }

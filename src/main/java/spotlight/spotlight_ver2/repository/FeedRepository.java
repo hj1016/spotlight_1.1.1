@@ -61,4 +61,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
 
     @Query("SELECT f FROM Feed f WHERE f.user.id IN :userIds")
     List<Feed> findByStudentIdIn(@Param("userIds") List<Long> userIds);
+
+    @Query("SELECT f FROM Feed f JOIN f.user u WHERE u.username = :username")
+    List<Feed> findByUsername(@Param("username") String username);
 }

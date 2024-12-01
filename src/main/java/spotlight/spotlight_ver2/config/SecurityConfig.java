@@ -33,6 +33,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll() // spring security의 계속된 403 error 반환을 막기 위함
                         .requestMatchers("/api/user/**").permitAll()
                         .requestMatchers("/api/search/schoolandmajor").permitAll()
+                        .requestMatchers("/api/feeds/**").authenticated()
                         .requestMatchers("/api/chatgpt/**", "/api/careernet/**").authenticated()
                         .anyRequest().authenticated()
                 )
