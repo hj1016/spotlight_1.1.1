@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import spotlight.spotlight_ver2.dto.StudentDTO;
+import spotlight.spotlight_ver2.dto.UserDTO;
 import spotlight.spotlight_ver2.entity.Proposal;
 import spotlight.spotlight_ver2.entity.ProjectRole;
 import spotlight.spotlight_ver2.entity.Student;
@@ -31,14 +32,30 @@ public interface StudentMapper {
 
     // StudentUserDTO -> User
     @Named("mapStudentUserDTOToUser")
-    default User mapStudentUserDTOToUser(StudentDTO.StudentUserDTO userDTO) {
-        if (userDTO == null) return null;
+    default User mapStudentUserDTOToUser(UserDTO userDTO) {
+        if (userDTO == null) {
+            return null;
+        }
         User user = new User();
         user.setId(userDTO.getId());
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         user.setName(userDTO.getName());
         return user;
+    }
+
+    // User -> StudentUserDTO
+    @Named("mapUserToStudentUserDTO")
+    default UserDTO mapUserToStudentUserDTO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setName(user.getName());
+        return userDTO;
     }
 
     // 제안서 목록 매핑
@@ -55,13 +72,5 @@ public interface StudentMapper {
         return projectRoles.stream()
                 .map(StudentDTO.StudentProjectRoleDTO::new)
                 .collect(Collectors.toSet());
-    }
-
-    // User -> StudentUserDTO
-    @Named("mapUserToStudentUserDTO")
-    default StudentDTO.StudentUserDTO mapUserToStudentUserDTO(User user) {
-        if (user == null) return null;
-        StudentDTO.StudentUserDTO userDTO = new StudentDTO.StudentUserDTO(user);
-        return userDTO;
     }
 }

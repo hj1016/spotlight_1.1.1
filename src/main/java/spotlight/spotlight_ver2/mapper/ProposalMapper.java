@@ -30,6 +30,8 @@ public interface ProposalMapper {
     Proposal toEntity(ProposalRequest request);
 
     // Proposal -> ProposalResponse
+    @Mapping(target = "recruiter.certification", ignore = true)
+    @Mapping(target = "recruiter.username", ignore = true)
     ProposalResponse toResponse(Proposal proposal);
 
     // Recruiter -> ProposalRecruiterDTO
