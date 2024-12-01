@@ -1,11 +1,13 @@
 package spotlight.spotlight_ver2.entity;
 
 import jakarta.persistence.*;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
+@ToString
 public class Proposal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +20,7 @@ public class Proposal {
     @Column(name = "contact")
     private String contact;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 2000)
     private String description;
 
     @CreationTimestamp

@@ -20,8 +20,8 @@ public class RecruiterDTO {
     @Schema(description = "재직 증명서 URL", example = "http://example.com/certification.jpg")
     private String recruiterCertificate;
 
-    @Schema(description = "사용자 정보", implementation = RecruiterUserDTO.class)
-    private RecruiterUserDTO user;
+    @Schema(description = "사용자 정보", implementation = UserDTO.class)
+    private UserDTO user;
 
     public RecruiterDTO() {}
 
@@ -31,7 +31,7 @@ public class RecruiterDTO {
         this.recruiterCertificate = recruiter.getRecruiterCertificate();
 
         // User 객체가 null이 아닐 때만 RecruiterUserDTO 초기화
-        this.user = (recruiter.getUser() != null) ? new RecruiterUserDTO(recruiter.getUser()) : null;
+        this.user = (recruiter.getUser() != null) ? new UserDTO(recruiter.getUser()) : null;
     }
 
     @Getter

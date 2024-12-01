@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import spotlight.spotlight_ver2.entity.Student;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
@@ -21,4 +22,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     // 학교와 학과로 학생 검색
     @Query("SELECT s FROM Student s WHERE s.school = :school AND s.major = :major")
     List<Student> findBySchoolAndMajor(@Param("school") String school, @Param("major") String major);
+
+    Optional<Student> findByUserId(Long userId);
 }

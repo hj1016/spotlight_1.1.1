@@ -30,8 +30,8 @@ public class StudentDTO {
     @Schema(description = "재학 증명서 URL", example = "http://example.com/enrollment-cert.jpg")
     private String studentCertificate;
 
-    @Schema(description = "사용자 정보", implementation = StudentUserDTO.class)
-    private StudentUserDTO user;
+    @Schema(description = "사용자 정보", implementation = UserDTO.class)
+    private UserDTO user;
 
     @Schema(description = "제안서 목록", implementation = StudentProposalDTO.class)
     private List<StudentProposalDTO> proposals;
@@ -49,7 +49,7 @@ public class StudentDTO {
         this.studentCertificate = student.getStudentCertificate();
 
         // 사용자 정보 초기화
-        this.user = (student.getUser() != null) ? new StudentUserDTO(student.getUser()) : null;
+        this.user = (student.getUser() != null) ? new UserDTO(student.getUser()) : null;
 
         // 제안서 목록 초기화
         this.proposals = (student.getProposals() != null) ? student.getProposals().stream()

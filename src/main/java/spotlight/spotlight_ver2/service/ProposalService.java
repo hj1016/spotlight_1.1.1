@@ -1,6 +1,8 @@
 package spotlight.spotlight_ver2.service;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import spotlight.spotlight_ver2.config.NotificationConstants;
@@ -32,6 +34,7 @@ public class ProposalService {
     private final NotificationService notificationService;
     private final UserService userService;
     private final ProposalMapper proposalMapper = ProposalMapper.INSTANCE;
+    private final Logger logger = LoggerFactory.getLogger(ProposalService.class);
 
     @Autowired
     public ProposalService(ProposalRepository proposalRepository, StudentRepository studentRepository, RecruiterRepository recruiterRepository, NotificationService notificationService, UserService userService) {
@@ -92,6 +95,8 @@ public class ProposalService {
     public List<ProposalResponse> getProposalsByStudent(long id) {
         User user = userService.getUserById(id);
         List<Proposal> proposals = proposalRepository.findByStudent_User(user);
+        logger.info("Proposals: {}", proposals);
+        proposals.forEach(proposal -> logger.info("Proposal: {}", proposal));
 
         return proposals.stream()
                 .map(this::toProposalResponse)
@@ -131,12 +136,26 @@ public class ProposalService {
         response.setCreatedDate(proposal.getCreatedDate().toString());
         response.setStatus(proposal.getStatus());
 
+        Long recruiterUserId = proposal.getRecruiter().getUserId();
+        Recruiter recruiter = recruiterRepository.findByUserId(recruiterUserId).orElse(null);
         ProposalDTO.ProposalRecruiterDTO recruiterDTO = new ProposalDTO.ProposalRecruiterDTO();
-        recruiterDTO.setUserId(proposal.getRecruiter().getUserId());
+        if (recruiter != null) {
+            recruiterDTO.setUserId(recruiter.getUserId());
+            recruiterDTO.setCompany(recruiter.getCompany());
+            recruiterDTO.setCertification(recruiter.getRecruiterCertificate());
+            recruiterDTO.setUsername(recruiter.getUser().getUsername());
+        }
         response.setRecruiter(recruiterDTO);
 
+        Long studentUserId = proposal.getStudent().getUserId();
+        Student student = studentRepository.findByUserId(studentUserId).orElse(null);
         ProposalDTO.ProposalStudentDTO studentDTO = new ProposalDTO.ProposalStudentDTO();
-        studentDTO.setUserId(proposal.getStudent().getUserId());
+        if (student != null) {
+            studentDTO.setUserId(student.getUserId());
+            studentDTO.setMajor(student.getMajor());
+            studentDTO.setPortfolioImage(student.getPortfolioImage());
+            studentDTO.setSchool(student.getSchool());
+        }
         response.setStudent(studentDTO);
 
         return response;
