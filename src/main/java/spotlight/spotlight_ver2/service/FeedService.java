@@ -324,4 +324,14 @@ public class FeedService {
                 .map(feedMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<FeedDTO> getScrappedFeeds() {
+        List<Feed> feeds = feedRepository.findAllScrappedFeeds();
+
+        List<FeedDTO> feedDTOs = feeds.stream()
+                .map(feedMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return feedDTOs;
+    }
 }

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import spotlight.spotlight_ver2.dto.FeedDTO;
@@ -413,5 +414,17 @@ public class FeedController {
         } catch (Exception e) {
             return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.");
         }
+    }
+
+    @Operation(summary = "스크랩된 피드 목록 조회", description = "사용자가 스크랩한 피드 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "스크랩된 피드 목록 조회 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FeedDTO.class))),
+            @ApiResponse(responseCode = "404", description = "스크랩된 피드가 없습니다."),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping("/scrapped")
+    public ResponseEntity<List<FeedDTO>> getScrappedFeeds() {
+        List<FeedDTO> scrappedFeeds = feedService.getScrappedFeeds();
+        return ResponseEntity.ok(scrappedFeeds);
     }
 }

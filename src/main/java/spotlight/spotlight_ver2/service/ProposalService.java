@@ -34,7 +34,6 @@ public class ProposalService {
     private final NotificationService notificationService;
     private final UserService userService;
     private final ProposalMapper proposalMapper = ProposalMapper.INSTANCE;
-    private final Logger logger = LoggerFactory.getLogger(ProposalService.class);
 
     @Autowired
     public ProposalService(ProposalRepository proposalRepository, StudentRepository studentRepository, RecruiterRepository recruiterRepository, NotificationService notificationService, UserService userService) {
@@ -95,8 +94,6 @@ public class ProposalService {
     public List<ProposalResponse> getProposalsByStudent(long id) {
         User user = userService.getUserById(id);
         List<Proposal> proposals = proposalRepository.findByStudent_User(user);
-        logger.info("Proposals: {}", proposals);
-        proposals.forEach(proposal -> logger.info("Proposal: {}", proposal));
 
         return proposals.stream()
                 .map(this::toProposalResponse)
