@@ -422,9 +422,25 @@ public class FeedController {
             @ApiResponse(responseCode = "404", description = "스크랩된 피드가 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    @GetMapping("/scrapped")
-    public ResponseEntity<List<FeedDTO>> getScrappedFeeds() {
-        List<FeedDTO> scrappedFeeds = feedService.getScrappedFeeds();
-        return ResponseEntity.ok(scrappedFeeds);
+    @GetMapping("/feeds/scrapped")
+    public ResponseEntity<?> getScrappedFeeds() {
+        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
+
+        if (currentUser == null || !currentUser.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        try {
+            String username = currentUser.getName();
+            List<FeedDTO> scrappedFeeds = feedService.getScrappedFeedsByUsername(username);
+
+            if (scrappedFeeds.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            return ResponseEntity.ok(scrappedFeeds);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.");
+        }
     }
 }

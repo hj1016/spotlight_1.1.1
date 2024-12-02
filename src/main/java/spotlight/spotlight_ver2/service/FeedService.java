@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -325,13 +326,13 @@ public class FeedService {
                 .collect(Collectors.toList());
     }
 
-    public List<FeedDTO> getScrappedFeeds() {
-        List<Feed> feeds = feedRepository.findAllScrappedFeeds();
+    public List<FeedDTO> getScrappedFeedsByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다."));
 
-        List<FeedDTO> feedDTOs = feeds.stream()
+        List<Feed> scrappedFeeds = feedRepository.findScrappedFeedsByUsername(user.getUsername());
+        return scrappedFeeds.stream()
                 .map(feedMapper::toDTO)
                 .collect(Collectors.toList());
-
-        return feedDTOs;
     }
 }
