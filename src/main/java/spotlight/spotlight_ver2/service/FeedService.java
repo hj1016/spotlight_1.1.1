@@ -63,10 +63,23 @@ public class FeedService {
         return feedMapper.toDTO(createdFeed);
     }
 
-    public FeedDTO getFeedById(Long id) {
-        Feed feed = feedRepository.findByIdWithAllRelations(id)
-                .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
-        return new FeedDTO(feed);
+    public FeedDTO getFeedById(Long feedId, Long userId) {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(() -> new NotFoundException("피드를 찾을 수 없습니다."));
+
+        FeedDTO feedDTO = new FeedDTO(feed);
+
+        // 사용자 ID가 제공된 경우, 스크랩 상태를 확인
+        if (userId != null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+            boolean isScrapped = scrapRepository.existsByUserAndFeed(user, feed);
+            feedDTO.setScrapped(isScrapped);
+        } else {
+            feedDTO.setScrapped(false); // 기본값
+        }
+
+        return feedDTO;
     }
 
     public FeedDTO updateFeed(Long id, FeedDTO feedDTO) {

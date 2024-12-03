@@ -95,9 +95,12 @@ public class FeedController {
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
     @GetMapping("/{feedId}")
-    public ResponseEntity<?> getFeed(@PathVariable Long feedId) {
+    public ResponseEntity<?> getFeed(
+            @PathVariable Long feedId,
+            @RequestParam(required = false) Long userId // 현재 사용자의 ID
+    ) {
         try {
-            FeedDTO feed = feedService.getFeedById(feedId);
+            FeedDTO feed = feedService.getFeedById(feedId, userId);
             return ResponseEntity.ok(feed);
         } catch (NotFoundException e) {
             return ErrorResponse.toResponseEntity(HttpStatus.NOT_FOUND, e.getMessage());

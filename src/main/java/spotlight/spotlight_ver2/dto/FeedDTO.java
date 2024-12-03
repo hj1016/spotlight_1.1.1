@@ -35,6 +35,9 @@ public class FeedDTO {
     @Schema(description = "스크랩 수", example = "123")
     private Integer scrap;
 
+    @Schema(description = "스크랩 여부", example = "true")
+    private boolean scrapped;
+
     @Schema(description = "사용자 조회 수", example = "456")
     private Integer hitsUser;
 
@@ -72,6 +75,7 @@ public class FeedDTO {
         this.feedImages = feed.getFeedImages();
         this.content = feed.getContent();
         this.scrap = feed.getScrap();
+        this.scrapped = scrapped;
         this.hitsUser = feed.getHitsUser();
         this.hitsRecruiter = feed.getHitsRecruiter();
         this.createdDate = feed.getCreatedDate();
