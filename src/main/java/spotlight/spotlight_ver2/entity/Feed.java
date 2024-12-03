@@ -21,6 +21,9 @@ public class Feed {
     @Column(name = "thumbnail_image")
     private String thumbnailImage;
 
+    @Column(name = "feed_img", length = 2048)
+    private String feedImg;
+
     @Column(name = "feed_images")
     private List<String> feedImages;
 
@@ -85,6 +88,14 @@ public class Feed {
 
     public String getThumbnailImage() {
         return thumbnailImage;
+    }
+
+    public String getFeedImg() {
+        return feedImg;
+    }
+
+    public void setFeedImg(String feedImg) {
+        this.feedImg = feedImg;
     }
 
     public List<String> getFeedImages() {

@@ -26,6 +26,8 @@ public class FeedDTO {
     @Schema(description = "썸네일 이미지 URL", example = "http://example.com/thumbnail.jpg")
     private String thumbnailImage;
 
+    private String feedImg;
+
     @Schema(description = "피드 이미지 URL 목록", example = "[\"http://example.com/image1.jpg\", \"http://example.com/image2.jpg\"]")
     private List<String> feedImages;  // String -> List<String>
 
@@ -72,6 +74,7 @@ public class FeedDTO {
         this.feedId = feed.getFeedId();
         this.title = feed.getTitle();
         this.thumbnailImage = feed.getThumbnailImage();
+        this.feedImg = feed.getFeedImg();
         this.feedImages = feed.getFeedImages();
         this.content = feed.getContent();
         this.scrap = feed.getScrap();

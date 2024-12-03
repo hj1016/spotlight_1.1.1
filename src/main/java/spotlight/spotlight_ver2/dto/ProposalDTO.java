@@ -67,8 +67,11 @@ public class ProposalDTO {
         @Schema(description = "리크루터 인증 정보", example = "Certified Recruiter")
         private String certification;
 
-        @Schema(description = "사용자 이름", example = "리크루터 이름")
+        @Schema(description = "사용자 ID", example = "한국회사 리크루터123")
         private String username;
+
+        @Schema(description = "사용자 프로필 이미지 URL", example = "http://example.com/profile.jpg")
+        private String profileImage;
 
         public ProposalRecruiterDTO() {}
 
@@ -77,6 +80,7 @@ public class ProposalDTO {
             this.company = (recruiter != null) ? recruiter.getCompany() : null;
             this.certification = (recruiter != null) ? recruiter.getRecruiterCertificate() : null;
             this.username = (recruiter != null && recruiter.getUser() != null) ? recruiter.getUser().getUsername() : null;
+            this.profileImage = (recruiter != null && recruiter.getUser() != null) ? recruiter.getUser().getProfileImage() : null;
         }
     }
 
@@ -95,6 +99,12 @@ public class ProposalDTO {
         @Schema(description = "학교 이름", example = "Tech University")
         private String school;
 
+        @Schema(description = "학생 프로필 이미지 URL", example = "http://example.com/profile.jpg")
+        private String profileImage;
+
+        @Schema(description = "학생 이름", example = "John Doe")
+        private String name;
+
         public ProposalStudentDTO() {}
 
         public ProposalStudentDTO(Student student) {
@@ -102,6 +112,8 @@ public class ProposalDTO {
             this.major = (student != null) ? student.getMajor() : null;
             this.portfolioImage = (student != null) ? student.getPortfolioImage() : null;
             this.school = (student != null) ? student.getSchool() : null;
+            this.profileImage = (student != null && student.getUser() != null) ? student.getUser().getProfileImage() : null;
+            this.name = (student != null && student.getUser() != null) ? student.getUser().getName() : null;
         }
     }
 }
