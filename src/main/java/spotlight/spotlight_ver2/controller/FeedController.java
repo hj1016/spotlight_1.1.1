@@ -425,7 +425,7 @@ public class FeedController {
             @ApiResponse(responseCode = "404", description = "스크랩된 피드가 없습니다."),
             @ApiResponse(responseCode = "500", description = "서버 오류")
     })
-    @GetMapping("/feeds/scrapped")
+    @GetMapping("/scrapped")
     public ResponseEntity<?> getScrappedFeeds() {
         Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
 
