@@ -63,6 +63,7 @@ public class StudentDTO {
     }
 
     @Getter
+    @Setter
     public static class StudentUserDTO {
         @Schema(description = "사용자 ID", example = "1")
         private Long id;
@@ -87,6 +88,7 @@ public class StudentDTO {
     }
 
     @Getter
+    @Setter
     public static class StudentProposalDTO {
         @Schema(description = "제안서 ID", example = "1")
         private Long proposalId;
@@ -125,6 +127,7 @@ public class StudentDTO {
     }
 
     @Getter
+    @Setter
     public static class StudentProjectRoleDTO {
         @Schema(description = "프로젝트 역할 ID")
         private Long id;

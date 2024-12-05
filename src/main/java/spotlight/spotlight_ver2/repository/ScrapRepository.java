@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import spotlight.spotlight_ver2.entity.*;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ScrapRepository extends JpaRepository<Scrap, Long> {
@@ -23,4 +24,7 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
     Optional<Scrap> findByUserAndScrappedUser(@Param("user") User user, @Param("scrappedUser") User scrappedUser);
 
     boolean existsByUserAndScrappedUser(User user, User scrappedUser);
+
+    @Query("SELECT st FROM Student st JOIN Scrap s ON s.scrappedUser.id = st.user.id WHERE s.user.id = :userId")
+    List<Student> findScrappedStudentsByUserId(@Param("userId") Long userId);
 }

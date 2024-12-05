@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import spotlight.spotlight_ver2.dto.FeedDTO;
 import spotlight.spotlight_ver2.dto.FeedHitsDTO;
 import spotlight.spotlight_ver2.dto.MemberDTO;
+import spotlight.spotlight_ver2.dto.StudentDTO;
 import spotlight.spotlight_ver2.entity.User;
 import spotlight.spotlight_ver2.enums.Role;
 import spotlight.spotlight_ver2.exception.*;
@@ -441,6 +442,25 @@ public class FeedController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
             return ResponseEntity.ok(scrappedFeeds);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.");
+        }
+    }
+
+    @GetMapping("/scrapped-students")
+    public ResponseEntity<?> getScrappedStudents() {
+        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
+        if (currentUser == null || !currentUser.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        try {
+            String username = currentUser.getName();
+            List<StudentDTO> scrappedStudents = feedService.getScrappedStudentsByUsername(username);
+            if (scrappedStudents.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            return ResponseEntity.ok(scrappedStudents);
         } catch (Exception e) {
             e.printStackTrace();
             return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 오류가 발생했습니다. 나중에 다시 시도해주세요.");

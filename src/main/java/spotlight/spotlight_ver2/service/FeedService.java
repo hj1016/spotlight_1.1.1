@@ -348,4 +348,15 @@ public class FeedService {
                 .map(feedMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<StudentDTO> getScrappedStudentsByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다"));
+
+        Long userId = user.getId();
+        List<Student> scrappedStudents = scrapRepository.findScrappedStudentsByUserId(userId);
+        return scrappedStudents.stream()
+                .map(studentMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }
